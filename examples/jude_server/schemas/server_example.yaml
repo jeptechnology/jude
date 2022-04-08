@@ -1,0 +1,171 @@
+Constant MaxStringLength: 32
+
+Class HiddenConfig: { auth: Root, persist: yes }
+Class HiddenStatus: { auth: Root, persist: no  }
+
+Enum HugeEnum: 
+   Negative: -2147483647
+   Positive:  2147483646
+
+Enum TestEnum: 
+   Zero  :  { value: 0, description: A value of zero }
+   First :  { value: 1, description: The first real value }
+   Second:  2
+   Truth : 42 
+
+Bitmask BitMask8: 
+   BitZero  : 0
+   BitOne   : 1
+   BitTwo   : 2
+   BitThree : 3
+   BitFour  : 4
+   BitFive  : 5
+   BitSix   : 
+      bit: 6
+      description: This is a special bit
+   BitSeven : 7
+
+Bitmask BitMask32: 
+   BitZero  : 0
+   BitOne   : 1
+   # BitTwo   : 2
+   # BitThree : 3
+   BitFour  : 4
+   BitFive  : 5
+   BitSix   :
+      bit: 6
+      description: This is a special bit
+   BitSeven : 7
+   BitEight : 8
+   BitNine : 9
+   # Mind the Gap!
+   Bit30 : 30
+   Bit31 : 31
+
+Bitmask BitMask64: 
+   Bit4  : 4
+   Bit30 : 30
+   Bit31 : 31
+   Bit32 : 32
+   Bit60 : 60
+
+Object TagsTest:
+   privateStatus: { type: i8, description: "A private status field", min: 20, max: 255, class: HiddenStatus }
+   privateConfig: { type: i8, description: "A private config field", min: 20, max: 255, class: HiddenConfig }
+   action:        { type: bool, class: Action }
+   somePassword: 
+      type: string:16
+      description: A password field
+      min: 20
+      max: 255
+      tag: 2
+      auth:
+         read: Root
+         write: Public
+      persist: yes 
+   publicStatus: 
+      type: i8
+      persist: no 
+      auth:
+         write: Root
+   publicReadOnlyConfig: 
+      type: i8
+      auth:
+         read: Public
+         write: Root
+      persist: yes 
+   publicTempConfig:
+      type: i8
+      persist: no
+   publicConfig:
+      type: i8
+
+Object TagsTestRepeated:
+   privateStatus[MaxStringLength]: { type: i8, class: HiddenStatus }
+   privateConfig[MaxStringLength]: { type: i8, class: HiddenConfig }
+   action       [MaxStringLength]: i8
+   somePassword [MaxStringLength]: i8
+   publicStatus [MaxStringLength]: { type: i8, class: Status }     
+   publicReadOnlyConfig[MaxStringLength]: i8
+   publicTempConfig    [MaxStringLength]: i8  
+   publicConfig        [MaxStringLength]: { type: i8, class: Config }          
+
+Object TagsTestSubMessage:
+   privateStatus: { type: TagsTest, class: HiddenStatus }
+   privateConfig: { type: TagsTest, class: HiddenConfig }
+   action:        TagsTest
+   somePassword:  TagsTest
+   publicStatus:  { type: TagsTest, class: Status }       
+   publicReadOnlyConfig: TagsTest
+   publicTempConfig:     TagsTest   
+   publicConfig:         { type: TagsTest, class: Config }              
+
+Object TagsTestSubArrays:
+   privateStatus[32]: { type: TagsTest, class: HiddenStatus }
+   privateConfig[32]: { type: TagsTest, class: HiddenConfig } 
+   action       [32]: TagsTest
+   somePassword [32]: TagsTest
+   publicStatus [32]: { type: TagsTest, class: Status }       
+   publicReadOnlyConfig[32]: TagsTest
+   publicTempConfig    [32]: TagsTest
+   publicConfig        [32]: { type: TagsTest, class: Config }
+
+Object AllRepeatedTypes: 
+   int8_type  [32]:   i8
+   int16_type [32]:  i16
+   int32_type [32]:  i32
+   int64_type [32]:  i64
+   uint8_type [32]:   u8
+   uint16_type[32]:  u16
+   uint32_type[32]:  u32
+   uint64_type[32]:  u64
+   bool_type  [32]:  bool
+   string_type[32]:  string:MaxStringLength
+   bytes_type [32]:  bytes:MaxStringLength
+   submsg_type[32]:  SubMessage 
+   enum_type  [32]:  TestEnum
+   bitmask_type[32]: BitMask8
+
+Object AllOptionalTypes:
+   int8_type  :   i8
+   int16_type :  i16
+   int32_type :  i32
+   int64_type :  i64
+   uint8_type :   u8
+   uint16_type:  u16
+   uint32_type:  u32
+   uint64_type:  u64    
+   bool_type:    bool
+   string_type:  string:32
+   bytes_type:   bytes:32
+   submsg_type:  SubMessage 
+   enum_type:    TestEnum
+   bitmask_type: BitMask8
+
+Object SubMessage:
+   substuff1: string:64
+   substuff2: i32
+   substuff3: bool
+
+Object ActionTest:
+   value1: string:64
+   value2: i32
+   value3: bool
+   actionOnBool(): bool
+   actionOnInteger(): i32
+   actionOnString(): string:32
+   actionOnObject(): AllOptionalTypes  
+
+Object EmptyMessage:
+
+Database SubDB:
+   collection[600000]: SubMessage
+   resource: SubMessage
+
+Database TestDB:
+   collection1[1000]: SubMessage
+   collection2[2000]: SubMessage
+   resource1: SubMessage
+   resource2: SubMessage
+   subDB: SubDB
+

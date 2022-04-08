@@ -1,0 +1,65 @@
+{
+   // Use IntelliSense to learn about possible attributes.
+   // Hover to view descriptions of existing attributes.
+   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+   "version": "0.2.0",
+   "configurations": [
+      {
+         "name": "Unit Tests",
+         "type": "cppdbg",
+         "request": "launch",
+         "program": "${workspaceFolder}/build/tests/jude_test",
+         "args": [],
+         "stopAtEntry": false,
+         "cwd": "${fileDirname}",
+         "environment": [],
+         "externalConsole": false,
+         "MIMode": "gdb",
+         "setupCommands": [
+            {
+               "description": "Enable pretty-printing for gdb",
+               "text": "-enable-pretty-printing",
+               "ignoreFailures": true
+            }
+         ]
+      },
+      {
+         "name": "CLI",
+         "type": "cppdbg",
+         "request": "launch",
+         "program": "${workspaceFolder}/build/cli/jude_cli",
+         "args": ["localhost:8080"],
+         "stopAtEntry": false,
+         "cwd": "${fileDirname}",
+         "environment": [],
+         "externalConsole": false,
+         "MIMode": "gdb",
+         "setupCommands": [
+            {
+               "description": "Enable pretty-printing for gdb",
+               "text": "-enable-pretty-printing",
+               "ignoreFailures": true
+            }
+         ]
+      },
+      {
+         "name": "Example Server",
+         "type": "cppdbg",
+         "request": "launch",
+         "program": "${workspaceFolder}/build/examples/jude_server/jude_server",
+         "args": ["8080"],
+         "stopAtEntry": false,
+         "cwd": "${fileDirname}",
+         "environment": [],
+         "externalConsole": false,
+         "MIMode": "gdb",
+         "setupCommands": [
+            {
+               "description": "Enable pretty-printing for gdb",
+               "text": "-enable-pretty-printing",
+               "ignoreFailures": true
+            }
+         ]
+      }
+  ]
+}

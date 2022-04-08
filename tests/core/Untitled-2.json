@@ -1,0 +1,210 @@
+  /Actions/:
+    get:
+      summary: Get all entries in the Actions collection
+      tags:
+        - /Actions
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/ActionTest_Schema'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+    post:
+      summary: Create a new entry in the Actions collection
+      tags:
+        - /Actions
+      requestBody:
+        description: Object to add to collection
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionTest_Schema'
+      responses:
+        '201':
+           description: ActionTest created
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+
+  /Actions/{id}:
+    get:
+      summary: Get entry in the Actions collection with given id
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ActionTest_Schema'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+    patch:
+      summary: Update the entry in the Actions collection with given id
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        description: partial JSON object representing fields you wish to change
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionTest_Schema'
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ActionTest_Schema'
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+    delete:
+      summary: Delete the entry in the Actions collection with given id
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      responses:
+        '204':
+           description: Object deleted
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+  /Actions/{id}/actionOnBool:
+    patch:
+      summary: Invoke the action actionOnBool() on the Actions resource
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        description: partial JSON object representing fields you wish to change
+        content:
+          application/json:
+            schema: 
+              type: boolean
+
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ActionTest_Schema'
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+  /Actions/{id}/actionOnInteger:
+    patch:
+      summary: Invoke the action actionOnInteger() on the Actions resource
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        description: partial JSON object representing fields you wish to change
+        content:
+          application/json:
+            schema: 
+              type: integer
+
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ActionTest_Schema'
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+  /Actions/{id}/actionOnString:
+    patch:
+      summary: Invoke the action actionOnString() on the Actions resource
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        description: partial JSON object representing fields you wish to change
+        content:
+          application/json:
+            schema: 
+              type: string
+              maxLength: 31
+
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ActionTest_Schema'
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
+
+  /Actions/{id}/actionOnObject:
+    patch:
+      summary: Invoke the action actionOnObject() on the Actions resource
+      tags:
+        - /Actions
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+      requestBody:
+        description: partial JSON object representing fields you wish to change
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/AllOptionalTypes_Schema'
+
+      responses:
+        '200':
+           description: OK
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/ActionTest_Schema'
+        '400':
+           $ref: '#/components/responses/400BadRequest'
+        '403':
+           description: Not authorized
+        '404':
+           description: Not found
