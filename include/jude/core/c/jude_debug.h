@@ -23,12 +23,12 @@
 
 #pragma once
 
+#include <stdarg.h>
+#include "jude_object.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdarg.h>
-#include "jude_object.h"
 
 void jude_set_debug_printer(void (*printer_fn)(const char *format, va_list args));
 void jude_debug(const char* format, ...);

@@ -23,12 +23,12 @@
 
 #pragma once
 
+#include "../../porting/jude_porting.h"
+#include <inttypes.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "../../porting/jude_porting.h"
-#include <inttypes.h>
 
 /* Define this if your CPU architecture is big endian, i.e. it
  * stores the most-significant byte first. */

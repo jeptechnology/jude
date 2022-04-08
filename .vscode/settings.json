@@ -72,6 +72,7 @@
       "jude_browser.h": "c",
       "jude_porting.h": "c",
       "jude_core.h": "c",
-      "jude_rtti.h": "c"
+      "jude_rtti.h": "c",
+      "jude_encode.h": "c"
    }
 }

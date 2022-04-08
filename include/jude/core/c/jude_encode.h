@@ -23,11 +23,11 @@
 
 #pragma once
 
+#include "jude_common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "jude_core.h"
 
 // All wiretype encode functions for any transport type must use functions of this shape
 typedef bool (jude_encoder_t)(jude_ostream_t *stream, const jude_field_t *field, const void *src) checkreturn;

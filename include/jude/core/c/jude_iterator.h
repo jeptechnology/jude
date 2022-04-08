@@ -23,11 +23,11 @@
 
 #pragma once
 
+#include "jude_internal.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "jude_core.h"
 
 typedef union
 {

@@ -179,4 +179,6 @@ jude_os_interface_t jude_porting_test_interface =
 };
 
 // during tests we will use our test interface
+#ifndef JUDE_USE_STDLIB
 jude_os_interface_t *jude_os = &jude_porting_test_interface;
+#endif
