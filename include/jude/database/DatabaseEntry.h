@@ -23,9 +23,11 @@
 
 #pragma once
 
-#include "../core/cpp/RestApiInterface.h"
+#include <jude/core/cpp/RestApiInterface.h>
 #include <jude/core/cpp/PubSubInterface.h>
 #include <jude/core/cpp/Validatable.h>
+#include <jude/core/cpp/Stream.h>
+#include <iostream>
 #include <set>
 #include <memory>
 #include <mutex>
@@ -70,17 +72,18 @@ namespace jude
       virtual DBEntryType GetEntryType() const = 0;
 
       virtual SubscriptionHandle SubscribeToAllPaths(std::string prefix, PathNotifyCallback callback, FieldMaskGenerator filterGenerator, NotifyQueue& queue) = 0;
-      virtual bool Restore(std::string path, InputStreamInterface& input) = 0;
+      virtual bool Restore(std::string path, std::istream& input) = 0;
 
       // Functions to support Open Api Spec 3.0 generation
-      virtual void OutputAllSchemasInYaml(OutputStreamInterface& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const = 0;
-      virtual void OutputAllSwaggerPaths(OutputStreamInterface& output, const std::string& prefix, jude_user_t userLevel) const = 0;
+      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const = 0;
+      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const = 0;
       virtual std::string GetSwaggerReadSchema(jude_user_t userLevel) const = 0;
 
       // Function outputs JSON-Schema
-      virtual void OutputJsonSchema(OutputStreamInterface& output, jude_user_t userLevel) const
+      virtual void OutputJsonSchema(std::ostream& output, jude_user_t userLevel) const
       {
-         jude_create_default_json_schema(output.GetLowLevelOutputStream(), GetType(), userLevel);
+         OutputStreamWrapper wrapper(output, jude_encode_transport_json);
+         jude_create_default_json_schema(&wrapper.m_ostream, GetType(), userLevel);
       }
 
    };

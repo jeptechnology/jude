@@ -22,6 +22,7 @@
  */
 
 #include <string>
+#include <sstream>
 #include <set>
 #include <climits>
 #include <jude/database/Swagger.h>
@@ -354,9 +355,9 @@ components:
 
       struct SchemaContext
       {
-         SchemaContext(OutputStreamInterface& s) : stream(s) {}
+         SchemaContext(std::ostream& s) : stream(s) {}
 
-         OutputStreamInterface& stream;
+         std::ostream& stream;
          std::string prefix;
          jude_user_t userLevel;
       };
@@ -416,22 +417,22 @@ components:
 
       std::string GetSchemaForActionField(const jude_field_t& field, jude_user_t userLevel)
       {
-         StringOutputStream output;
+         std::stringstream output;
          SchemaContext context(output);
          context.prefix = "              ";
          context.userLevel = userLevel;
 
-         output.Print("\n");
+         output << "\n";
          OutputSchema(context, &field);
 
-         return output.GetString();
+         return output.str();
       }
 
       void OutputArraySchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: array\n", context.prefix.c_str());
-         context.stream.Printf(64, "%s" "maxItems: %d\n", context.prefix.c_str(), field->array_size);
-         context.stream.Printf(64, "%s" "items:\n", context.prefix.c_str());
+         context.stream << context.prefix << "type: array\n";
+         context.stream << context.prefix << "maxItems: " << field->array_size << "\n";
+         context.stream << context.prefix << "items:\n";
 
          SchemaContext newContext = context;
          newContext.prefix = context.prefix + std::string("  ");
@@ -441,38 +442,36 @@ components:
 
       void OutputObjectSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(256, "%s" "$ref: '#/components/schemas/%s_Schema'\n", 
-            context.prefix.c_str(), 
-            field->details.sub_rtti->name);
+         context.stream << context.prefix << "$ref: '#/components/schemas/" << field->details.sub_rtti->name << "_Schema'\n";
       }
 
       void OutputStringSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: string\n", context.prefix.c_str());
-         context.stream.Printf(64, "%s" "maxLength: %d\n", context.prefix.c_str(), field->data_size - 1);
+         context.stream << context.prefix << "type: string\n";
+         context.stream << context.prefix << "maxLength: " << (field->data_size - 1) << "\n";
       }
 
       void OutputBytesSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: string\n", context.prefix.c_str());
-         context.stream.Printf(64, "%s" "maxLength: %d\n", context.prefix.c_str(), ((field->data_size + 2) / 3) * 4);
+         context.stream << context.prefix << "type: string\n";
+         context.stream << context.prefix << "maxLength: " << (((field->data_size + 2) / 3) * 4) << "\n";
       }
 
       void OutputUnsignedSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: integer\n", context.prefix.c_str());
-         context.stream.Printf(64, "%s" "minimum: %" PRId64 "\n", context.prefix.c_str(), GetMinimum(*field));
+         context.stream << context.prefix << "type: integer\n";
+         context.stream << context.prefix << "minimum: "  << GetMinimum(*field) << "\n";
          auto maxValue = GetMaximum(*field);
          // Only set a max if we are restricted by 8 or 16 bits (i.e. 32, 64 bits => no limit)
          if (maxValue > 0)
          {
-            context.stream.Printf(64, "%s" "maximum: %" PRId64 "\n", context.prefix.c_str(), maxValue);
+            context.stream << context.prefix << "maximum: " << maxValue << "\n";
          }
       }
 
       void OutputSignedSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: integer\n", context.prefix.c_str());
+         context.stream << context.prefix << "type: integer\n";
 
          auto minValue = GetMinimum(*field);
          auto maxValue = GetMaximum(*field);
@@ -480,37 +479,37 @@ components:
          // Only set a min if we are restricted by 8 or 16 bits (i.e. 32, 64 bits => no limit)
          if (minValue != 0)
          {
-            context.stream.Printf(64, "%s" "minimum: %" PRId64 "\n", context.prefix.c_str(), minValue);
+            context.stream << context.prefix << "minimum: " << minValue << "\n";
          }
 
          // Only set a max if we are restricted by 8 or 16 bits (i.e. 32, 64 bits => no limit)
          if (maxValue != 0)
          {
-            context.stream.Printf(64, "%s" "maximum: %" PRId64 "\n", context.prefix.c_str(), maxValue);
+            context.stream << context.prefix << "maximum: " << maxValue << "\n";
          }
       }
 
       void OutputBoolSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: boolean\n", context.prefix.c_str());
+         context.stream << context.prefix << "type: boolean\n";
       }
 
       void OutputFloatSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: number\n", context.prefix.c_str());
+         context.stream << context.prefix << "type: number\n";
       }
 
       void OutputBitmaskSchema(SchemaContext& context, const jude_field_t* field)
       {
-         context.stream.Printf(64, "%s" "type: object\n", context.prefix.c_str());
-         context.stream.Printf(64, "%s" "properties:\n", context.prefix.c_str());
+         context.stream << context.prefix << "type: object\n";
+         context.stream << context.prefix << "properties:\n";
         
          const jude_enum_map_t* enum_map = field->details.enum_map;
 
          while (enum_map && enum_map->name)
          {
-            context.stream.Printf(64, "%s" "  %s:\n", context.prefix.c_str(), enum_map->name);
-            context.stream.Printf(64, "%s" "    type: boolean\n", context.prefix.c_str());
+            context.stream << context.prefix << "  " << enum_map->name << ":\n";
+            context.stream << context.prefix << "    type: boolean\n";
             enum_map++;
          }
       }
@@ -523,14 +522,14 @@ components:
             return;
          }
 
-         context.stream.Printf(64, "%s" "type: string\n", context.prefix.c_str());
-         context.stream.Printf(64, "%s" "enum:\n", context.prefix.c_str());
+         context.stream << context.prefix << "type: string\n";
+         context.stream << context.prefix << "enum:\n";
 
          const jude_enum_map_t* enum_map = field->details.enum_map;
 
          while (enum_map && enum_map->name)
          {
-            context.stream.Printf(64, "%s" "- '%s'\n", context.prefix.c_str(), enum_map->name);
+            context.stream << context.prefix << "- '" << enum_map->name << "'\n";
             enum_map++;
          }
       }
@@ -581,38 +580,39 @@ components:
 
       void GenerateObjectFieldSchema(SchemaContext& context, const jude_field_t* field, jude_user_t userLevel)
       {
-         context.stream.Printf(64,  "%sallOf: [\n", context.prefix.c_str());
-         context.stream.Printf(256, "%s  { $ref: '#/components/schemas/%s_Schema' }", 
-            context.prefix.c_str(), 
-            field->details.sub_rtti->name);
+         context.stream << context.prefix << "allOf: [\n";
+         context.stream << context.prefix << "  { $ref: '#/components/schemas/" << field->details.sub_rtti->name << "_Schema' }";
 
          if (!IsWritable(*field, userLevel))
          {
-            context.stream.Printf(64, ",\n%s  { readOnly: true }", context.prefix.c_str());
+            context.stream << ",\n";
+            context.stream << context.prefix << "  { readOnly: true }";
          }
          
          if (!IsReadable(*field, userLevel))
          {
-            context.stream.Printf(64, ",\n%s  { writeOnly: true }", context.prefix.c_str());
+            context.stream << ",\n";
+            context.stream << context.prefix << "  { writeOnly: true }";
          }
          
          if (field->description && field->description[0] != '\0')
          {
-            context.stream.Printf(256, ",\n%s  { description: %s ", context.prefix.c_str(), field->description);
-            context.stream.Print("}");
+            context.stream << ",\n";
+            context.stream << context.prefix << "s  { description: " << field->description << " }";
          }
 
-         context.stream.Printf(64, "\n%s]\n", context.prefix.c_str());
+         context.stream << "\n";
+         context.stream << context.prefix << "]\n";
       }
 
-      void GenerateSchema(OutputStreamInterface& output, const jude_rtti_t& rtti, jude_user_t userLevel)
+      void GenerateSchema(std::ostream& output, const jude_rtti_t& rtti, jude_user_t userLevel)
       {
          SchemaContext context(output);
          context.prefix = "          ";
          context.userLevel = userLevel;
 
-         output.Printf(64, "\n    %s_Schema:\n", rtti.name);
-         output.Printf(64, "      type: object\n");
+         output << "\n    " << rtti.name << "_Schema:\n";
+         output << "      type: object\n";
 
          bool propertiesHasBeenOutput = false;
 
@@ -632,11 +632,11 @@ components:
 
             if (!propertiesHasBeenOutput)
             {
-               output.Printf(64, "      properties:\n");
+               output << "      properties:\n";
                propertiesHasBeenOutput = true;
             }
 
-            output.Printf(64, "        %s:\n", field->label);
+            output << "        %s:\n", field->label;
             
             if (jude_field_is_object(field) && !jude_field_is_array(field))
             {
@@ -646,18 +646,17 @@ components:
 
             if (!IsWritable(*field, userLevel))
             {
-               output.Printf(64, "          readOnly: true\n");
+               output << "          readOnly: true\n";
             }
             
             if (!IsReadable(*field, userLevel))
             {
-               output.Printf(64, "          writeOnly: true\n");
+               output << "          writeOnly: true\n";
             }
             
             if (field->description && field->description[0] != '\0')
             {
-               output.Printf(256, "          description: %s", field->description);
-               output.Print("\n");
+               output << "          description: " << field->description << "\n";
             }
 
             if (jude_field_is_array(field))
@@ -671,7 +670,7 @@ components:
          }
       }
 
-      void RecursivelyOutputSchemas(OutputStreamInterface& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel)
+      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel)
       {
          for (const auto& s : schemas)
          {

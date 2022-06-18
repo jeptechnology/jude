@@ -22,11 +22,11 @@
  */
 
 #pragma once
-
 #include <jude/restapi/jude_rest_api.h>
-#include <jude/core/cpp/Stream.h>
 #include <jude/core/cpp/AccessControl.h>
 #include <jude/core/cpp/RestfulResult.h>
+
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -46,10 +46,10 @@ namespace jude
       static const AccessControl accessToEverything; // gives access to all fields
 
       // RESTful operations to be implemented
-      virtual RestfulResult RestGet   (const char* path, OutputStreamInterface& output, const AccessControl& accessControl = accessToEverything) const = 0;
-      virtual RestfulResult RestPost  (const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) = 0;
-      virtual RestfulResult RestPatch (const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) = 0;
-      virtual RestfulResult RestPut   (const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) = 0;
+      virtual RestfulResult RestGet   (const char* path, std::ostream& output, const AccessControl& accessControl = accessToEverything) const = 0;
+      virtual RestfulResult RestPost  (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) = 0;
+      virtual RestfulResult RestPatch (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) = 0;
+      virtual RestfulResult RestPut   (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) = 0;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) = 0;
 
       // Convenience functions
@@ -57,7 +57,7 @@ namespace jude
       std::string   ToJSON(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
       std::string   ToJSON_EmptyOnError(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
       std::string   ToJSON_WithNulls(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
-      RestfulResult ToJSON(OutputStreamInterface& output, const AccessControl& accessControl = accessToEverything) const { return RestGet("", output, accessControl); }
+      RestfulResult ToJSON(std::ostream& output, const AccessControl& accessControl = accessToEverything) const { return RestGet("", output, accessControl); }
 
       RestfulResult RestPostString(const char* path, const char* input, jude_user_t userLevel = Options::DefaultAccessLevelForJSON);
       RestfulResult RestPatchString(const char* path, const char* input, jude_user_t userLevel = Options::DefaultAccessLevelForJSON);
@@ -75,7 +75,7 @@ namespace jude
 
       ///////////////////////////////////////////////////////////////////////////////
       // Protobuf backwards compatibility
-      bool JsonEncodeTo(OutputStreamInterface& output, const AccessControl& accessControl = accessToEverything) const
+      bool JsonEncodeTo(std::ostream& output, const AccessControl& accessControl = accessToEverything) const
       {
          return ToJSON(output, accessControl).IsOK(); // on failure, inspect output.GetOutputErrorMsg()
       }

@@ -95,9 +95,9 @@ namespace
       return s;
    }
 
-   StringOutputStream ReadContent(const ContentReader &content_reader)
+   std::stringstream ReadContent(const ContentReader &content_reader)
    {
-      StringOutputStream output;
+      std::stringstream output;
 
       content_reader([&](const char *data, size_t data_length) {
         return output.Write(reinterpret_cast<const uint8_t*>(data), data_length) == data_length;
@@ -136,7 +136,7 @@ namespace jude
       }
 
       svr.Get("/.*", [&](const Request &req, Response &res) {
-         jude::StringOutputStream output(1024 * 1024, 1024);
+         std::stringstream output(1024 * 1024, 1024);
          
          if (req.has_param("completions"))
          {
@@ -180,7 +180,7 @@ namespace jude
          res.status = result.GetCode();
          if (result)
          {
-            jude::StringOutputStream output;
+            std::stringstream output;
             std::stringstream newPath;
             newPath << req.path << "/" << result.GetCreatedObjectId();
             m_database.RestGet(newPath.str().c_str(), output);         
@@ -201,7 +201,7 @@ namespace jude
          res.status = result.GetCode();
          if (result)
          {
-            jude::StringOutputStream output;
+            std::stringstream output;
             m_database.RestGet(req.path.c_str(), output);
             res.set_content(output.GetString(), "application/json");
          }

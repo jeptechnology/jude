@@ -31,6 +31,7 @@
 #include <map>
 #include <vector>
 #include <optional>
+#include <iomanip>
 
 using namespace std;
 
@@ -229,13 +230,13 @@ namespace jude
       return output;
    }
 
-   RestfulResult Database::RestGet(const char* fullpath, OutputStreamInterface& output, const AccessControl& accessControl) const
+   RestfulResult Database::RestGet(const char* fullpath, std::ostream& output, const AccessControl& accessControl) const
    {      
       if ( m_allowGlobalRestGet && 
           (fullpath == nullptr || fullpath[0] == 0 || std::string(fullpath) == "/")
          )
       {
-         output.Print("{");
+         output << '{';
          bool first = true;
          for (auto const& entry : m_entries)
          {
@@ -243,16 +244,16 @@ namespace jude
             {
                if (!first)
                {
-                  output.Print(",");
+                  output << ',';
                }
 
-               output.Printf(64, "\"%s\":", entry.first.c_str());
+               output << std::quoted(entry.first) << ':';
                entry.second->RestGet("/", output, accessControl);
 
                first = false;
             }
          }
-         output.Print("}");
+         output << '}';
          
          return jude_rest_OK;
       }
@@ -264,7 +265,7 @@ namespace jude
       return fullpath ? jude_rest_Not_Found : jude_rest_Method_Not_Allowed; // method not allowed on root db object
    }
 
-   RestfulResult Database::RestPost(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult Database::RestPost(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (auto entry = FindEntryForPath(&fullpath, accessControl.GetAccessLevel()))
       {
@@ -273,7 +274,7 @@ namespace jude
       return fullpath ? jude_rest_Not_Found : jude_rest_Method_Not_Allowed; // method not allowed on root db object
    }
 
-   RestfulResult Database::RestPatch(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult Database::RestPatch(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (auto entry = FindEntryForPath(&fullpath, accessControl.GetAccessLevel()))
       {
@@ -282,7 +283,7 @@ namespace jude
       return fullpath ? jude_rest_Not_Found : jude_rest_Method_Not_Allowed; // method not allowed on root db object
    }
 
-   RestfulResult Database::RestPut(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult Database::RestPut(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (auto entry = FindEntryForPath(&fullpath, accessControl.GetAccessLevel()))
       {
@@ -317,7 +318,7 @@ namespace jude
       return nullptr;
    }
 
-   void Database::OutputAllSchemasInYaml(jude::OutputStreamInterface& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
+   void Database::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
    {
       for (const auto& entry : m_entries)
       {
@@ -327,20 +328,19 @@ namespace jude
       // Now if the global read is available, we output the schema for this:
       if (m_allowGlobalRestGet)
       {
-         output.Printf(1024, "\n"
-            "    %s_Schema:\n"
-            "      type: object\n"
-            "      properties:\n"
-            , GetNameForSchema());
+         output << "\n"
+                << "    " << GetNameForSchema() << "_Schema:\n"
+                << "      type: object\n"
+                << "      properties:\n";
 
          for (const auto& entry : m_entries)
          {
-            output.Print(entry.second->GetSwaggerReadSchema(userLevel).c_str());
+            output << entry.second->GetSwaggerReadSchema(userLevel);
          }
       }
    }
 
-   void Database::OutputAllSwaggerPaths(jude::OutputStreamInterface& output, const std::string& prefix, jude_user_t userLevel) const
+   void Database::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const
    {
       // output swagger end points descriptions for the entire resource...
       std::string subPrefix = m_name.length() ? (prefix + "/" + m_name) : prefix;
@@ -348,16 +348,19 @@ namespace jude
 
       if (m_allowGlobalRestGet && userLevel >= m_accessLevel)
       {
+         char buffer[1024];
          if (m_name.length() == 0 && prefix.length() == 0)
          {
             // global top level path
-            output.Printf(64, "  /:"); // global
-            output.Printf(1024, swagger::GetTemplate, "entire DB", GetNameForSchema(), GetNameForSchema());
+            output << "  /:"; // global
+            snprintf(buffer, std::size(buffer), swagger::GetTemplate, "entire DB", GetNameForSchema(), GetNameForSchema());
+            output << buffer;
          }
          else
          {
-            output.Printf(64, "  %s/%s/:", prefix.c_str(), m_name.c_str());
-            output.Printf(1024, swagger::GetTemplate, m_name.c_str(), m_name.c_str(), m_name.c_str(), m_name.c_str());
+            output << "  " << prefix << "/" << m_name << "/:";
+            snprintf(buffer, std::size(buffer), swagger::GetTemplate, m_name.c_str(), m_name.c_str(), m_name.c_str(), m_name.c_str());
+            output << buffer;
          }
          newLineRequired = true;
       }
@@ -375,26 +378,29 @@ namespace jude
 
          if (newLineRequired)
          {
-            output.Print("\n");
+            output << "\n";
          }
          entry.second->OutputAllSwaggerPaths(output, subPrefix, userLevel);         
          newLineRequired = true;
       }
    }
 
-   void Database::GenerateYAMLforSwaggerOAS3(jude::OutputStreamInterface& output, jude_user_t userLevel) const
+   void Database::GenerateYAMLforSwaggerOAS3(std::ostream& output, jude_user_t userLevel) const
    {
+      char buffer[1024];
+
       // Opening "info" and "servers"...
-      output.Printf(1024, swagger::HeaderTemplate, m_name.c_str(), "data/v2");
+      snprintf(buffer, 1024, swagger::HeaderTemplate, m_name.c_str(), "data/v2");
+      output << buffer;
 
       // All paths
-      output.Print("\n\npaths:\n");
+      output << "\n\npaths:\n";
       OutputAllSwaggerPaths(output, "", userLevel);
 
       // Common components (errors, parameters, etc)
-      output.Print("\n");
-      output.Print(swagger::ComponentsTemplate);
-      output.Print("\n  schemas:\n");
+      output << "\n";
+      output << swagger::ComponentsTemplate;
+      output << "\n  schemas:\n";
 
       // Schemas in use in this API
       std::set<const jude_rtti_t*> alreadyDone;
@@ -408,13 +414,11 @@ namespace jude
          return "";
       }
 
-      static const char* schemaTemplate = "        %s:\n"
-                                          "          $ref: '#/components/schemas/%s_Schema'\n";
-
-      StringOutputStream output;
+      std::stringstream output;
       const char* name = GetNameForSchema();
-      output.Printf(1024, schemaTemplate, name, name);
-      return output.GetString();
+      output << "        " << name << ":\n";
+      output << "          $ref: '#/components/schemas/" << name << "_Schema'\n";
+      return output.str();
    }
 
    SubscriptionHandle Database::SubscribeToAllPaths(std::string prefix, PathNotifyCallback callback, FieldMaskGenerator filterGenerator, NotifyQueue& queue)
@@ -435,7 +439,7 @@ namespace jude
       });
    }
 
-   bool Database::Restore(std::string path, InputStreamInterface& input)
+   bool Database::Restore(std::string path, std::istream& input)
    {
       const char *next = path.c_str();
       if (auto entry = FindEntryForPath(&next, jude_user_Root))

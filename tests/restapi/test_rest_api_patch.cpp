@@ -2,9 +2,8 @@
 #include <jude/restapi/jude_rest_api.h>
 #include <algorithm>
 #include <ctype.h>
+#include <sstream>
 
-#include "streams/mock_istream.h"
-#include "streams/mock_ostream.h"
 #include "autogen/alltypes_test/AllOptionalTypes.h"
 #include "autogen/alltypes_test/AllRepeatedTypes.h"
 
@@ -15,9 +14,6 @@ class RestApiPatchTests : public ::testing::Test
 public:
    jude::AllOptionalTypes singleTypes = jude::AllOptionalTypes::New();
    jude::AllRepeatedTypes arrayTypes = jude::AllRepeatedTypes::New();
-
-   MockInputStream mockInput;
-   MockOutputStream mockOutput;
 
    jude_user_t ADMIN = jude_user_Admin;
    jude_user_t PUBLIC = jude_user_Public;
@@ -43,18 +39,16 @@ public:
 
    void Verify_Patch(jude_user_t user, const char* fullpath, const char *inputJSON, jude_restapi_code_t expected_code)
    {
-      MockInputStream mis;
-      mis.SetData(inputJSON);
-      auto result_code = singleTypes.RestPatch(fullpath, mis, user).GetCode();
-      ASSERT_EQ(result_code, expected_code) << "PATCH " << fullpath << " resulted in unexpected code: " << result_code << endl << "Stream error: " << mis.GetInputErrorMsg();
+      stringstream mis(inputJSON);
+      auto result = singleTypes.RestPatch(fullpath, mis, user);
+      ASSERT_EQ(result.GetCode(), expected_code) << "PATCH " << fullpath << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
    }
 
    void Verify_Array_Patch(jude_user_t user, const char* fullpath, const char* inputJSON, jude_restapi_code_t expected_code)
    {
-      MockInputStream mis;
-      mis.SetData(inputJSON);
-      auto result_code = arrayTypes.RestPatch(fullpath, mis, user).GetCode();
-      ASSERT_EQ(result_code, expected_code) << "PATCH " << fullpath << " resulted in unexpected code: " << result_code << endl << "Stream error: " << mis.GetInputErrorMsg();
+      stringstream mis(inputJSON);
+      auto result = arrayTypes.RestPatch(fullpath, mis, user);
+      ASSERT_EQ(result.GetCode(), expected_code) << "PATCH " << fullpath << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
    }
 
    void Verify_Get(jude_user_t user,
@@ -62,16 +56,15 @@ public:
       jude_restapi_code_t expected_code,
       const char* expected_result = nullptr)
    {
-      MockOutputStream mos(256);
-      auto result_code = singleTypes.RestGet(fullpath, mos, user).GetCode();
-      mos.Flush();
-      ASSERT_EQ(result_code, expected_code) << "GET " << fullpath << " resulted in unexpected code: " << result_code << endl << "Stream error: " << mos.GetOutputErrorMsg();
+      stringstream mos;
+      auto result = singleTypes.RestGet(fullpath, mos, user);
+      ASSERT_EQ(result.GetCode(), expected_code) << "GET " << fullpath << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
       if (expected_result)
       {
-         EXPECT_STREQ(expected_result, mos.GetOutputString().c_str()) << "GET " << fullpath << " resulted in unexpected response";
+         EXPECT_STREQ(expected_result, mos.str().c_str()) << "GET " << fullpath << " resulted in unexpected response";
       }
 
-      lastOutput = mos.GetOutputString();
+      lastOutput = mos.str();
    }
 
    void Verify_Array_Get(jude_user_t user,
@@ -79,21 +72,18 @@ public:
       jude_restapi_code_t expected_code,
       const char* expected_result = nullptr)
    {
-      MockOutputStream mos(256);
-      auto result_code = arrayTypes.RestGet(fullpath, mos, user).GetCode();
-      mos.Flush();
-
-      ASSERT_EQ(result_code, expected_code) << "GET " << fullpath << " resulted in unexpected code: " << result_code;
+      stringstream mos;
+      auto result = arrayTypes.RestGet(fullpath, mos, user);
+      ASSERT_EQ(result.GetCode(), expected_code) << "GET " << fullpath << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
       if (expected_result)
       {
          string expected = expected_result;
          StripSpaces(expected);
-         EXPECT_STREQ(expected.c_str(), mos.GetOutputString().c_str()) << "GET " << fullpath << " resulted in unexpected response";
+         EXPECT_STREQ(expected.c_str(), mos.str().c_str()) << "GET " << fullpath << " resulted in unexpected response";
       }
 
-      lastOutput = mos.GetOutputString();
+      lastOutput = mos.str();
    }
-
 };
 
 TEST_F(RestApiPatchTests, patch_bad_path_returns_404)

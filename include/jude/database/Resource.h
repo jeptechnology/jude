@@ -88,24 +88,24 @@ namespace jude
       virtual size_t SubscriberCount() const override { return m_subscribers.size(); }
 
       // From RestApiInterface...
-      virtual RestfulResult RestGet(const char* path, OutputStreamInterface& output, const AccessControl& accessControl = accessToEverything) const override;
-      virtual RestfulResult RestPost(const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) override;
-      virtual RestfulResult RestPatch(const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) override;
-      virtual RestfulResult RestPut(const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) override;
+      virtual RestfulResult RestGet(const char* path, std::ostream& output, const AccessControl& accessControl = accessToEverything) const override;
+      virtual RestfulResult RestPost(const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
+      virtual RestfulResult RestPatch(const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
+      virtual RestfulResult RestPut(const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
       virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;
 
       virtual std::string DebugInfo() const override;
-      virtual void OutputAllSchemasInYaml(jude::OutputStreamInterface& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const override;
-      virtual void OutputAllSwaggerPaths(jude::OutputStreamInterface& output, const std::string& prefix, jude_user_t userLevel) const override;
+      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const override;
+      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const override;
       virtual std::string GetSwaggerReadSchema(jude_user_t userLevel) const override;
 
       virtual DBEntryType GetEntryType() const override { return DBEntryType::RESOURCE; }
 
       SubscriptionHandle ValidateWith(Validatable<>::Validator callback) override;
       SubscriptionHandle SubscribeToAllPaths(std::string prefix, PathNotifyCallback callback, FieldMaskGenerator filterGenerator, NotifyQueue& queue) override;
-      bool Restore(std::string path, InputStreamInterface& input) override;
+      bool Restore(std::string path, std::istream& input) override;
 
       Object              GenericLock();
       Transaction<Object> GenericTransaction();

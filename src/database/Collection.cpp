@@ -67,43 +67,50 @@ namespace jude
       }
    }
 
-   void CollectionBase::OutputAllSchemasInYaml(jude::OutputStreamInterface& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
+   void CollectionBase::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
    {
       swagger::RecursivelyOutputSchemas(output, alreadyDone, &m_rtti, userLevel);
    }
 
-   void CollectionBase::OutputAllSwaggerPaths(jude::OutputStreamInterface& output, const std::string& prefix, jude_user_t userLevel) const
+   void CollectionBase::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const
    {
+      char buffer[1024];
       auto collectionName = m_name.c_str();
 
       std::string apiTag = prefix + "/" + m_name;
 
       // output collection endpoints
-      output.Printf(64, "  %s/%s/:", prefix.c_str(), collectionName);
+      output << "  " << prefix << '/' << collectionName << "/:";
+      
       if (userLevel >= m_access.canRead)
       {
-         output.Printf(1024, swagger::GetAllTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::GetAllTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         output << buffer;
       }
       if (userLevel >= m_access.canCreate)
       {
-         output.Printf(1024, swagger::PostTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::PostTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         output << buffer;
       }
 
       // output resource endpoints
-      output.Printf(64, "\n  %s/%s/{id}:", prefix.c_str(), collectionName);
+      output << "\n  " << prefix << '/' << collectionName << "/{id}:";
       if (userLevel >= m_access.canRead)
       {
-         output.Printf(1024, swagger::GetWithIdTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::GetWithIdTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         output << buffer;
       }
       if (userLevel >= m_access.canUpdate)
       {
-         output.Printf(1024, swagger::PatchWithIdTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::PatchWithIdTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         output << buffer;
          // PUT is technically optional but discouraged as it clears other writable fields
-         // output.Printf(1024, swagger::PutWithIdTemplate, collectionName, collectionName, m_rtti.name, m_rtti.name);
+         // ... swagger::PutWithIdTemplate, collectionName, collectionName, m_rtti.name, m_rtti.name ...
       }
       if (userLevel >= m_access.canDelete)
       {
-         output.Printf(1024, swagger::DeleteWithIdTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::DeleteWithIdTemplate, collectionName, apiTag.c_str(), m_rtti.name, m_rtti.name);
+         output << buffer;
       }
 
       if (userLevel >= m_access.canUpdate)
@@ -117,9 +124,10 @@ namespace jude
                continue;
             }
             auto schema = swagger::GetSchemaForActionField(field, userLevel);
-
-            output.Printf(128, "\n  %s/%s/{id}/%s:", prefix.c_str(), collectionName, field.label);
-            output.Printf(1024, swagger::PatchActionWithIdTemplate, field.label, collectionName, apiTag.c_str(), schema.c_str(), m_rtti.name);
+            snprintf(buffer, std::size(buffer), "\n  %s/%s/{id}/%s:", prefix.c_str(), collectionName, field.label);
+            output << buffer;
+            snprintf(buffer, std::size(buffer), swagger::PatchActionWithIdTemplate, field.label, collectionName, apiTag.c_str(), schema.c_str(), m_rtti.name);
+            output << buffer;
          }
       }
    }
@@ -141,9 +149,9 @@ namespace jude
                                                "          items:\n"
                                                "            $ref: '#/components/schemas/%s_Schema'\n";
 
-      StringOutputStream output;
-      output.Printf(1024, (Options::SerialiseCollectionAsObjectMap ? schemaTemplateMap : schemaTemplateArray), m_name.c_str(), m_rtti.name);
-      return output.GetString();
+      char buffer[1024];
+      snprintf(buffer, std::size(buffer), (Options::SerialiseCollectionAsObjectMap ? schemaTemplateMap : schemaTemplateArray), m_name.c_str(), m_rtti.name);
+      return buffer;
    }
 
    ValidationResult CollectionBase::Validate(Validation<Object>& info)
@@ -464,7 +472,7 @@ namespace jude
       return RestfulResult(uuid);
    }
 
-   RestfulResult CollectionBase::RestoreEntry(InputStreamInterface& input)
+   RestfulResult CollectionBase::RestoreEntry(std::istream& input)
    {
       Object restoredObject(m_rtti);
       restoredObject.RestPut("", input);
@@ -587,7 +595,7 @@ namespace jude
       return m_objects.size();
    }
 
-   RestfulResult CollectionBase::RestGet(const char* fullpath, OutputStreamInterface& output, const AccessControl& accessControl) const
+   RestfulResult CollectionBase::RestGet(const char* fullpath, std::ostream& output, const AccessControl& accessControl) const
    {
       if (accessControl.GetAccessLevel() < m_access.canRead)
       {
@@ -599,7 +607,7 @@ namespace jude
 
       if (isRootPath) // no id token given
       {         
-         output.Print((Options::SerialiseCollectionAsObjectMap ? "{" : "["));
+         output << (Options::SerialiseCollectionAsObjectMap ? "{" : "[");
 
          bool commaNeeded = false;
 
@@ -608,7 +616,7 @@ namespace jude
          {
             if (commaNeeded)
             {
-               output.Print(",");
+               output << ',';
             }
             else
             {
@@ -617,7 +625,7 @@ namespace jude
 
             if (Options::SerialiseCollectionAsObjectMap)
             {
-               output.Printf(32, "\"%" PRIjudeID "\":", resource.first);
+               output << '"' << resource.first << "\":";
             }
 
             auto result = resource.second.RestGet("/", output, accessControl);
@@ -627,9 +635,9 @@ namespace jude
             }
          }
 
-         output.Print((Options::SerialiseCollectionAsObjectMap ? "}" : "]"));
+         output << (Options::SerialiseCollectionAsObjectMap ? "}" : "]");
 
-         return output.HasOutputError() ? jude_rest_Internal_Server_Error : jude_rest_OK;
+         return output ? jude_rest_Internal_Server_Error : jude_rest_OK;
       }
       else if (resource)
       {
@@ -640,7 +648,7 @@ namespace jude
       return jude_rest_Not_Found;
    }
 
-   RestfulResult CollectionBase::RestPost(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult CollectionBase::RestPost(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       bool isRootPath;
       auto transaction = CreateTransactionFromPath(&fullpath, isRootPath);
@@ -665,7 +673,7 @@ namespace jude
       return transaction.Commit();
    }
 
-   RestfulResult CollectionBase::RestPatch(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult CollectionBase::RestPatch(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (accessControl.GetAccessLevel() < m_access.canUpdate)
       {
@@ -696,7 +704,7 @@ namespace jude
       return transaction.Commit();
    }
 
-   RestfulResult CollectionBase::RestPut(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult CollectionBase::RestPut(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (accessControl.GetAccessLevel() < m_access.canUpdate)
       {
@@ -847,7 +855,7 @@ namespace jude
          queue);
    }
 
-   bool CollectionBase::Restore(std::string, InputStreamInterface& input)
+   bool CollectionBase::Restore(std::string, std::istream& input)
    {
       return RestoreEntry(input).IsOK();
    }

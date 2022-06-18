@@ -22,6 +22,7 @@
  */
 
 #include <jude/core/cpp/RestApiInterface.h>
+#include <sstream>
 
 namespace jude
 {
@@ -29,11 +30,11 @@ namespace jude
 
    std::string RestApiInterface::ToJSON_EmptyOnError(const char* path, size_t maxSize, jude_user_t userLevel) const
    {
-      StringOutputStream ss(maxSize);
+      std::stringstream ss;
       auto result = RestGet(path, ss, userLevel);
       if (result)
       {
-         return ss.GetString();
+         return ss.str();
       }
       // return empty string on error
       return "";
@@ -42,11 +43,11 @@ namespace jude
    // Convenience function
    std::string RestApiInterface::ToJSON(const char *path, size_t maxSize, jude_user_t userLevel) const
    { 
-      StringOutputStream ss(maxSize);
+      std::stringstream ss;
       auto result = RestGet(path, ss, userLevel);
       if (result)
       {
-         return ss.GetString();
+         return ss.str();
       }
       // return error string
       return "#ERROR: " + result.GetDetails();
@@ -54,15 +55,15 @@ namespace jude
 
    std::string RestApiInterface::ToJSON_WithNulls(const char* path, size_t maxSize, jude_user_t userLevel) const
    {
-      StringOutputStream ss(maxSize);
+      std::stringstream ss;
       
       // Output "Changed" but not "Set" as null.
-      ss.GetLowLevelOutputStream()->output_recently_cleared_as_null = true;
+      //ss.GetLowLevelOutputStream()->output_recently_cleared_as_null = true;
 
       auto result = RestGet(path, ss, userLevel);
       if (result)
       {
-         return ss.GetString();
+         return ss.str();
       }
       // return error string
       return "#ERROR: " + result.GetDetails();
@@ -70,19 +71,19 @@ namespace jude
 
    RestfulResult RestApiInterface::RestPostString(const char* path, const char *input, jude_user_t userLevel)
    {
-      auto is = RomInputStream(input);
+      std::stringstream is(input);
       return RestPost(path, is, userLevel);
    }
 
    RestfulResult RestApiInterface::RestPatchString(const char* path, const char* input, jude_user_t userLevel)
    {
-      auto is = RomInputStream(input);
+      std::stringstream is(input);
       return RestPatch(path, is, userLevel);
    }
 
    RestfulResult RestApiInterface::RestPutString(const char* path, const char* input, jude_user_t userLevel)
    {
-      auto is = RomInputStream(input);
+      std::stringstream is(input);
       return RestPut(path, is, userLevel);
    }
 

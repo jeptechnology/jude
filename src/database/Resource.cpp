@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <mutex>
 #include <set>
+#include <sstream>
 
 using namespace std;
 
@@ -125,7 +126,7 @@ namespace jude
          queue);
    }
 
-   bool GenericResource::Restore(std::string, InputStreamInterface& input)
+   bool GenericResource::Restore(std::string, std::istream& input)
    {
       return RestPut("", input, jude_user_Root).IsOK();
    }
@@ -148,28 +149,32 @@ namespace jude
       }
    }
 
-   void GenericResource::OutputAllSchemasInYaml(jude::OutputStreamInterface& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
+   void GenericResource::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
    {
       swagger::RecursivelyOutputSchemas(output, alreadyDone, &m_object.Type(), userLevel);
    }
 
-   void GenericResource::OutputAllSwaggerPaths(jude::OutputStreamInterface& output, const std::string& prefix, jude_user_t userLevel) const
+   void GenericResource::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const
    {
       const auto& rtti = m_object.Type();
 
       // output swagger end points descriptions for the entire resource...
       auto resourceName = m_name.c_str();
-      output.Printf(64, "  %s/%s/:", prefix.c_str(), resourceName);
+      output << "  " << prefix << "/" << resourceName << "/:";
 
       std::string apiTag = prefix + "/" + m_name;
 
+      char buffer[1024];
       if (userLevel >= m_access.canRead)
       {
-         output.Printf(1024, swagger::GetTemplate, resourceName, apiTag.c_str(), rtti.name, rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::GetTemplate, resourceName, apiTag.c_str(), rtti.name, rtti.name);
+         output << buffer;
       }
       if (userLevel >= m_access.canUpdate)
       {
-         output.Printf(1024, swagger::PatchTemplate, resourceName, apiTag.c_str(), rtti.name, rtti.name);
+         snprintf(buffer, std::size(buffer), swagger::PatchTemplate, resourceName, apiTag.c_str(), rtti.name, rtti.name);
+         output << buffer;
+
          // PUT is technically optional but discouraged as it clears other writable fields
          //output.Printf(1024, swagger::PutTemplate, resourceName, resourceName, rtti.name, rtti.name);
 
@@ -183,8 +188,9 @@ namespace jude
             }
             auto schema = swagger::GetSchemaForActionField(field, userLevel);
 
-            output.Printf(64, "\n  %s/%s/%s:", prefix.c_str(), resourceName, field.label);
-            output.Printf(1024, swagger::PatchActionTemplate, field.label, resourceName, apiTag.c_str(), schema.c_str(), rtti.name);
+            output << "\n  " << prefix << '/' <<  resourceName << '/' << field.label << '/';
+            snprintf(buffer, std::size(buffer), swagger::PatchActionTemplate, field.label, resourceName, apiTag.c_str(), schema.c_str(), rtti.name);
+            output << buffer;
          }
       }
    }
@@ -196,12 +202,10 @@ namespace jude
          return "";
       }
 
-      static const char* schemaTemplate = "        %s:\n"
-                                          "          $ref: '#/components/schemas/%s_Schema'\n";
-
-      StringOutputStream output;
-      output.Printf(1024, schemaTemplate, m_name.c_str(), m_object.Type().name);
-      return output.GetString();
+      std::stringstream output;
+      output << "        " << m_name << ":\n"
+             << "          $ref: '#/components/schemas/" << m_object.Type().name << "_Schema'\n";
+      return output.str();
    }
 
    RestfulResult GenericResource::OnTransactionCompleted(Object& copy, bool needsCommit)
@@ -323,7 +327,7 @@ namespace jude
       return transaction.Commit();
    }
 
-   RestfulResult GenericResource::RestGet(const char* fullpath, OutputStreamInterface& output, const AccessControl& accessControl) const
+   RestfulResult GenericResource::RestGet(const char* fullpath, std::ostream& output, const AccessControl& accessControl) const
    {
       if (accessControl.GetAccessLevel() < m_access.canRead)
       {
@@ -343,7 +347,7 @@ namespace jude
       return transaction.Commit();
    }
 
-   RestfulResult GenericResource::RestPost(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult GenericResource::RestPost(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (GetNextUrlToken(fullpath, nullptr).length() == 0)
       {
@@ -354,7 +358,7 @@ namespace jude
       return ApplyAndCommit(transaction, transaction->RestPost(fullpath, input, accessControl));
    }
 
-   RestfulResult GenericResource::RestPatch(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult GenericResource::RestPatch(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (accessControl.GetAccessLevel() < m_access.canUpdate)
       {
@@ -365,7 +369,7 @@ namespace jude
       return ApplyAndCommit(transaction, transaction->RestPatch(fullpath, input, accessControl));
    }
 
-   RestfulResult GenericResource::RestPut(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult GenericResource::RestPut(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       if (accessControl.GetAccessLevel() < m_access.canUpdate)
       {

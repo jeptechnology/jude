@@ -207,13 +207,13 @@ namespace jude
       bool Patch(const Object& rhs); // returns true when there are changes detected, no subscriptions moved
       RestfulResult UpdateFromJson(const std::string& JSON, bool deltasOnly = true) { return UpdateFromJson(JSON, nullptr, deltasOnly); }
       RestfulResult UpdateFromJson(const std::string& JSON, UnknownFieldHandler handler, bool deltasOnly = true);
-      RestfulResult UpdateFromJson(InputStreamInterface& JSON, bool deltasOnly = true);
+      RestfulResult UpdateFromJson(std::istream& JSON, bool deltasOnly = true);
 
       // REST API interface for this resource
-      virtual RestfulResult RestGet   (const char* path, OutputStreamInterface& output, const AccessControl& accessControl = accessToEverything) const override;
-      virtual RestfulResult RestPost  (const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) override;
-      virtual RestfulResult RestPatch (const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) override;
-      virtual RestfulResult RestPut   (const char* path, InputStreamInterface& input, const AccessControl& accessControl = accessToEverything) override;
+      virtual RestfulResult RestGet   (const char* path, std::ostream& output, const AccessControl& accessControl = accessToEverything) const override;
+      virtual RestfulResult RestPost  (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
+      virtual RestfulResult RestPatch (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
+      virtual RestfulResult RestPut   (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
       virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;

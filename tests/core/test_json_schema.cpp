@@ -5,8 +5,7 @@
 #include <ctype.h>
 
 #include "core/test_base.h"
-#include "streams/mock_istream.h"
-#include "streams/mock_ostream.h"
+#include "jude/core/cpp/Stream.h"
 #include "autogen/alltypes_test/AllOptionalTypes.h"
 #include "autogen/alltypes_test/AllRepeatedTypes.h"
 
@@ -15,7 +14,8 @@ using namespace std;
 class JsonSchemaTests : public JudeTestBase
 {
 public:
-   MockOutputStream mockOutput;
+   std::stringstream ss;
+   jude::OutputStreamWrapper mockOutput{ss};
 
    string StripSpaces(string& json)
    {
@@ -31,15 +31,15 @@ public:
 
 TEST_F(JsonSchemaTests, Successful_json_schema_call_returns_true)
 {
-   auto result = jude_create_default_json_schema(mockOutput.GetLowLevelOutputStream(), jude::SubMessage::RTTI(), jude_user_Public);
+   auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::SubMessage::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
 }
 
 TEST_F(JsonSchemaTests, Can_Create_SubMessage_schema)
 {
-   auto result = jude_create_default_json_schema(mockOutput.GetLowLevelOutputStream(), jude::SubMessage::RTTI(), jude_user_Public);
+   auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::SubMessage::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
-   ASSERT_TRUE(mockOutput.GetTotalBytesWritten() > 0);
+   ASSERT_TRUE(ss.str().length() > 0);
 
    auto expectedJsonSchema = StripSpaces(R"(
       {
@@ -74,14 +74,14 @@ TEST_F(JsonSchemaTests, Can_Create_SubMessage_schema)
       }
    )");
 
-   ASSERT_EQ(mockOutput.GetOutputString(), expectedJsonSchema);
+   ASSERT_STREQ(ss.str().c_str(), expectedJsonSchema.c_str());
 }
 
 TEST_F(JsonSchemaTests, Can_Create_AllOptional_schema)
 {
-   auto result = jude_create_default_json_schema(mockOutput.GetLowLevelOutputStream(), jude::AllOptionalTypes::RTTI(), jude_user_Public);
+   auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::AllOptionalTypes::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
-   ASSERT_TRUE(mockOutput.GetTotalBytesWritten() > 0);
+   ASSERT_TRUE(ss.str().length() > 0);
 
    auto expectedJsonSchema = StripSpaces(R"(
       { 
@@ -138,14 +138,14 @@ TEST_F(JsonSchemaTests, Can_Create_AllOptional_schema)
       }
    )");
 
-   ASSERT_STREQ(mockOutput.GetOutputString().c_str(), expectedJsonSchema.c_str());
+   ASSERT_STREQ(ss.str().c_str(), expectedJsonSchema.c_str());
 }
 
 TEST_F(JsonSchemaTests, Can_Create_AllRepeated_schema)
 {
-   auto result = jude_create_default_json_schema(mockOutput.GetLowLevelOutputStream(), jude::AllRepeatedTypes::RTTI(), jude_user_Public);
+   auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::AllRepeatedTypes::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
-   ASSERT_TRUE(mockOutput.GetTotalBytesWritten() > 0);
+   ASSERT_TRUE(ss.str().length() > 0);
 
    auto expectedJsonSchema = StripSpaces(R"(
       { 
@@ -204,5 +204,5 @@ TEST_F(JsonSchemaTests, Can_Create_AllRepeated_schema)
       }
    )");
 
-   ASSERT_STREQ(mockOutput.GetOutputString().c_str(), expectedJsonSchema.c_str());
+   ASSERT_STREQ(ss.str().c_str(), expectedJsonSchema.c_str());
 }

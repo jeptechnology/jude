@@ -23,7 +23,8 @@
 
 #pragma once
 #include <string>
-#include <jude/core/cpp/Stream.h>
+#include <iostream>
+#include <jude/jude_core.h>
 
 namespace jude
 {
@@ -49,6 +50,6 @@ namespace jude
       extern const char* PatchActionTemplate;
 
       std::string GetSchemaForActionField(const jude_field_t& field, jude_user_t userLevel);
-      void RecursivelyOutputSchemas(OutputStreamInterface& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel);
+      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel);
    }
 }
