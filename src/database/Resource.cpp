@@ -188,7 +188,7 @@ namespace jude
             }
             auto schema = swagger::GetSchemaForActionField(field, userLevel);
 
-            output << "\n  " << prefix << '/' <<  resourceName << '/' << field.label << '/';
+            output << "\n  " << prefix << '/' <<  resourceName << '/' << field.label << ':';
             snprintf(buffer, std::size(buffer), swagger::PatchActionTemplate, field.label, resourceName, apiTag.c_str(), schema.c_str(), rtti.name);
             output << buffer;
          }
