@@ -3,8 +3,6 @@
 #include <ctype.h>
 
 #include "core/test_base.h"
-#include "streams/mock_istream.h"
-#include "streams/mock_ostream.h"
 #include "autogen/alltypes_test/AllOptionalTypes.h"
 #include "autogen/alltypes_test/AllRepeatedTypes.h"
 #include "autogen/alltypes_test/ActionTest.h"
@@ -28,7 +26,7 @@ TEST_F(SwaggerTests, Individual_swagger_paths)
 {
    jude::Resource<SubMessage> sub("Hello", jude_user_Admin);
 
-   StringOutputStream output;
+   std::stringstream output;
    sub.OutputAllSwaggerPaths(output, "", jude_user_Admin);
    
    const char* expectedOutput = R"(  /Hello/:
@@ -74,14 +72,14 @@ TEST_F(SwaggerTests, Individual_swagger_paths)
 )";
 
 
-   ASSERT_STREQ(expectedOutput, output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput, output.str().c_str());
 }
 
 TEST_F(SwaggerTests, Individual_swagger_paths_with_actions)
 {
    jude::Resource<ActionTest> sub("Actions", jude_user_Admin);
 
-   StringOutputStream output;
+   std::stringstream output;
    sub.OutputAllSwaggerPaths(output, "", jude_user_Admin);
 
    const char* expectedOutput = R"(  /Actions/:
@@ -232,14 +230,14 @@ TEST_F(SwaggerTests, Individual_swagger_paths_with_actions)
 )";
 
 
-   ASSERT_STREQ(expectedOutput, output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput, output.str().c_str());
 }
 
 TEST_F(SwaggerTests, Collection_swagger_paths)
 {
    jude::Collection<SubMessage> subs("Hello", 16, jude_user_Admin);
 
-   StringOutputStream output;
+   std::stringstream output;
    subs.OutputAllSwaggerPaths(output, "", jude_user_Admin);
 
    const char* expectedOutput = R"(  /Hello/:
@@ -341,14 +339,14 @@ TEST_F(SwaggerTests, Collection_swagger_paths)
            description: Not found
 )";
 
-   ASSERT_STREQ(expectedOutput, output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput, output.str().c_str());
 }
 
 TEST_F(SwaggerTests, Collection_swagger_paths_with_actions)
 {
    jude::Collection<ActionTest> sub("Actions", 16, jude_user_Admin);
 
-   StringOutputStream output;
+   std::stringstream output;
    sub.OutputAllSwaggerPaths(output, "", jude_user_Admin);
 
    const char* expectedOutput = R"(  /Actions/:
@@ -564,7 +562,7 @@ TEST_F(SwaggerTests, Collection_swagger_paths_with_actions)
 )";
 
 
-   ASSERT_STREQ(expectedOutput, output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput, output.str().c_str());
 }
 
 TEST_F(SwaggerTests, Database_swagger_paths)
@@ -580,7 +578,7 @@ TEST_F(SwaggerTests, Database_swagger_paths)
    sub.AddToDB(indSub);
    db.AddToDB(sub);
 
-   StringOutputStream output;
+   std::stringstream output;
    db.OutputAllSwaggerPaths(output, "", jude_user_Admin);
 
    const char* expectedOutput = R"(  /Top/:
@@ -1008,7 +1006,7 @@ TEST_F(SwaggerTests, Database_swagger_paths)
            description: Not found
 )";
 
-   ASSERT_STREQ(expectedOutput, output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput, output.str().c_str());
 }
 
 TEST_F(SwaggerTests, Swagger_full_generation)
@@ -1027,7 +1025,7 @@ TEST_F(SwaggerTests, Swagger_full_generation)
    sub.AddToDB(indSub);
    db.AddToDB(sub);
 
-   StringOutputStream output;
+   std::stringstream output;
    db.GenerateYAMLforSwaggerOAS3(output, jude_user_Admin);
 
    string expectedOutput = ExpectedFullSwaggerDefinitionHeader;
@@ -1035,7 +1033,7 @@ TEST_F(SwaggerTests, Swagger_full_generation)
 
    Options::SerialiseCollectionAsObjectMap = true;
 
-   ASSERT_STREQ(expectedOutput.c_str(), output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput.c_str(), output.str().c_str());
 }
 
 TEST_F(SwaggerTests, Swagger_tagstest_generation)
@@ -1044,10 +1042,10 @@ TEST_F(SwaggerTests, Swagger_tagstest_generation)
    jude::Resource<TagsTest> ind("Single", jude_user_Admin);
    db.AddToDB(ind);
 
-   StringOutputStream output;
+   std::stringstream output;
    db.GenerateYAMLforSwaggerOAS3(output, jude_user_Admin);
 
    string expectedOutput = TagsTestSwagger;
 
-   ASSERT_STREQ(expectedOutput.c_str(), output.GetString().c_str());
+   ASSERT_STREQ(expectedOutput.c_str(), output.str().c_str());
 }

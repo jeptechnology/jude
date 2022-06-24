@@ -82,10 +82,9 @@ TEST_F(ClassArrayAccessorsTests, test_init_fields_nothing_set)
    CHECK_ARRAY_FIELD("Remove", fieldName, type, "[" #value1 "," #value3 "]", value1, value3);    \
                                                                                        \
    testarray.clear();                                                                  \
-   ASSERT_STREQ("{}", arrayTypes.ToJSON().c_str());                                    \
-   ASSERT_STREQ("{\"" #fieldName "\":null}", arrayTypes.ToJSON_WithNulls().c_str());   \
+   ASSERT_STREQ("{\"" #fieldName "\":null}", arrayTypes.ToJSON().c_str());             \
    arrayTypes.ClearChangeMarkers();                                                    \
-   ASSERT_STREQ("{}", arrayTypes.ToJSON_WithNulls().c_str());                          \
+   ASSERT_STREQ("{}", arrayTypes.ToJSON().c_str());                                    \
    ASSERT_EQ(0, testarray.count());                                                    \
                                                                                        \
    type writeData[] = { value1, value2, value3 };                                      \

@@ -47,9 +47,9 @@ namespace jude
 
       struct SchemaContext
       {
-         SchemaContext(OutputStreamInterface& s) : stream(s) {}
+         SchemaContext(std::ostream& s) : stream(s) {}
 
-         OutputStreamInterface& stream;
+         std::ostream& stream;
          std::string prefix;
          jude_user_t userLevel;
       };
@@ -109,7 +109,7 @@ namespace jude
 
       std::string GetSchemaForActionField(const jude_field_t& field, jude_user_t userLevel)
       {
-         StringOutputStream output;
+         std::stringstream output;
          SchemaContext context(output);
          context.prefix = "              ";
          context.userLevel = userLevel;
@@ -298,7 +298,7 @@ namespace jude
          context.stream.Printf(64, "\n%s]\n", context.prefix.c_str());
       }
 
-      void GenerateSchema(OutputStreamInterface& output, const jude_rtti_t& rtti, jude_user_t userLevel)
+      void GenerateSchema(std::ostream& output, const jude_rtti_t& rtti, jude_user_t userLevel)
       {
          SchemaContext context(output);
          context.prefix = "          ";
@@ -364,7 +364,7 @@ namespace jude
          }
       }
 
-      void RecursivelyOutputSchemas(OutputStreamInterface& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel)
+      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel)
       {
          for (const auto& s : schemas)
          {

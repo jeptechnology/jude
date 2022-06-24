@@ -191,11 +191,11 @@ static bool checkreturn encode_field(jude_ostream_t *stream, const jude_field_t 
  * Encode all fields *
  *********************/
 
-static bool jude_is_field_to_be_encoded(const jude_filter_t *filter, jude_iterator_t *iter, bool include_null_changes)
+static bool jude_is_field_to_be_encoded(const jude_filter_t *filter, jude_iterator_t *iter)
 {
    // check if field is set or if its just been nulled and we want to output that "null" value...
    if (  jude_iterator_is_touched(iter)
-      || (include_null_changes && jude_iterator_is_changed(iter)))
+      || jude_iterator_is_changed(iter)) // if field is "changed" but not "set" then we should output a JSON "null"
    {
       // check if a filter is in place...
       if (filter == NULL)
@@ -230,7 +230,7 @@ bool checkreturn jude_encode(jude_ostream_t *stream, const jude_object_t *src_st
    do
    {
       // Encode field if it is both set and in our filter mask
-      if (jude_is_field_to_be_encoded(&filterMask, &iter, stream->output_recently_cleared_as_null))
+      if (jude_is_field_to_be_encoded(&filterMask, &iter))
       {
          // keep track of the member we are encoding for debugging
          stream->member = iter.current_field->label;

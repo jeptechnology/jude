@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "jude/jude.h"
-#include "../streams/mock_ostream.h"
+#include "jude/core/cpp/Stream.h"
 #include "test_base.h"
 
 using namespace std;
@@ -18,22 +18,22 @@ public:
 
    void CheckJsonCreatedForSingleFields(string json)
    {
-      MockOutputStream mockOutput(32);
-      mockOutput.GetLowLevelOutputStream()->output_recently_cleared_as_null = true;
-      bool result = jude_encode(mockOutput.GetLowLevelOutputStream(), optionals_object);
-      jude_ostream_flush(mockOutput.GetLowLevelOutputStream());
-      ASSERT_TRUE(result) << "FAIL: " << jude_ostream_get_error(mockOutput.GetLowLevelOutputStream()) << " in JSON: " << json;
-      ASSERT_STREQ(json.c_str(), mockOutput.GetOutputString().c_str());
+      std::stringstream ss;
+      jude::OutputStreamWrapper mockOutput(ss);
+      bool result = jude_encode(&mockOutput.m_ostream, optionals_object);
+      jude_ostream_flush(&mockOutput.m_ostream);
+      ASSERT_TRUE(result) << "FAIL: " << jude_ostream_get_error(&mockOutput.m_ostream) << " in JSON: " << json;
+      ASSERT_STREQ(json.c_str(), ss.str().c_str());
    }
 
    void CheckJsonCreatedForArrayFields(string json)
    {
-      MockOutputStream mockOutput(32);
-      mockOutput.GetLowLevelOutputStream()->output_recently_cleared_as_null = true;
-      bool result = jude_encode(mockOutput.GetLowLevelOutputStream(), repeats_object);
-      jude_ostream_flush(mockOutput.GetLowLevelOutputStream());
-      ASSERT_TRUE(result) << "FAIL: " << jude_ostream_get_error(mockOutput.GetLowLevelOutputStream()) << " in JSON: " << json;
-      ASSERT_STREQ(json.c_str(), mockOutput.GetOutputString().c_str());
+      std::stringstream ss;
+      jude::OutputStreamWrapper mockOutput(ss);
+      bool result = jude_encode(&mockOutput.m_ostream, repeats_object);
+      jude_ostream_flush(&mockOutput.m_ostream);
+      ASSERT_TRUE(result) << "FAIL: " << jude_ostream_get_error(&mockOutput.m_ostream) << " in JSON: " << json;
+      ASSERT_STREQ(json.c_str(), ss.str().c_str());
    }
 };
 

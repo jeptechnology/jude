@@ -3,9 +3,8 @@
 #include <algorithm>
 #include <ctype.h>
 
+#include <jude/core/cpp/Stream.h>
 #include "core/test_base.h"
-#include "streams/mock_istream.h"
-#include "streams/mock_ostream.h"
 #include "autogen/alltypes_test/AllOptionalTypes.h"
 #include "autogen/alltypes_test/AllRepeatedTypes.h"
 
@@ -16,9 +15,6 @@ class RestApiPostTests : public JudeTestBase
 public:
    jude::AllOptionalTypes singleTypes = jude::AllOptionalTypes::New();
    jude::AllRepeatedTypes arrayTypes = jude::AllRepeatedTypes::New();
-
-   MockInputStream mockInput;
-   MockOutputStream mockOutput;
 
    jude_user_t ADMIN = jude_user_Admin;
    jude_user_t PUBLIC = jude_user_Public;
@@ -44,10 +40,9 @@ public:
 
    void Verify_Post(jude_user_t user, const char* path, const char *inputJSON, jude_restapi_code_t expected_code, jude_id_t expected_id = JUDE_AUTO_ID)
    {
-      MockInputStream mis;
-      mis.SetData(inputJSON);
+      stringstream mis(inputJSON);
       auto result = singleTypes.RestPost(path, mis, user);
-      ASSERT_EQ(result.GetCode(), expected_code) << "POST " << path << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << mis.GetInputErrorMsg();
+      ASSERT_EQ(result.GetCode(), expected_code) << "POST " << path << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
       if (expected_id != JUDE_AUTO_ID)
       {
          ASSERT_EQ(expected_id, result.GetCreatedObjectId()) << "new object / element from POST does not have the value I expected";
@@ -56,10 +51,9 @@ public:
 
    void Verify_Array_Post(jude_user_t user, const char* path, const char* inputJSON, jude_restapi_code_t expected_code, jude_id_t expected_id = JUDE_AUTO_ID)
    {
-      MockInputStream mis;
-      mis.SetData(inputJSON);
+      stringstream mis(inputJSON);
       auto result = arrayTypes.RestPost(path, mis, user);
-      ASSERT_EQ(result.GetCode(), expected_code) << "POST " << path << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << mis.GetInputErrorMsg();
+      ASSERT_EQ(result.GetCode(), expected_code) << "POST " << path << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
       if (expected_id != JUDE_AUTO_ID)
       {
          ASSERT_EQ(expected_id, result.GetCreatedObjectId()) << "new object / element from POST does not have the value I expected";
@@ -71,16 +65,15 @@ public:
       jude_restapi_code_t expected_code,
       const char* expected_result = nullptr)
    {
-      MockOutputStream mos(256);
-      auto result_code = singleTypes.RestGet(path, mos, user).GetCode();
-      mos.Flush();
-      ASSERT_EQ(result_code, expected_code) << "GET " << path << " resulted in unexpected code: " << result_code << endl << "Stream error: " << mos.GetOutputErrorMsg();
+      stringstream mos;
+      auto result = singleTypes.RestGet(path, mos, user);
+      ASSERT_EQ(result.GetCode(), expected_code) << "GET " << path << " resulted in unexpected code: " << result.GetCode() << endl << "Stream error: " << result.GetDetails();
       if (expected_result)
       {
-         EXPECT_STREQ(expected_result, mos.GetOutputString().c_str()) << "GET " << path << " resulted in unexpected response";
+         EXPECT_STREQ(expected_result, mos.str().c_str()) << "GET " << path << " resulted in unexpected response";
       }
 
-      lastOutput = mos.GetOutputString();
+      lastOutput = mos.str();
    }
 
    void Verify_Array_Get(jude_user_t user,
@@ -88,19 +81,18 @@ public:
       jude_restapi_code_t expected_code,
       const char* expected_result = nullptr)
    {
-      MockOutputStream mos(256);
-      auto result_code = arrayTypes.RestGet(path, mos, user).GetCode();
-      mos.Flush();
+      stringstream mos;
+      auto result = arrayTypes.RestGet(path, mos, user);
 
-      ASSERT_EQ(result_code, expected_code) << "GET " << path << " resulted in unexpected code: " << result_code;
+      ASSERT_EQ(result.GetCode(), expected_code) << "GET " << path << " resulted in unexpected code: " << result.GetCode();
       if (expected_result)
       {
          string expected = expected_result;
          StripSpaces(expected);
-         EXPECT_STREQ(expected.c_str(), mos.GetOutputString().c_str()) << "GET " << path << " resulted in unexpected response";
+         EXPECT_STREQ(expected.c_str(), mos.str().c_str()) << "GET " << path << " resulted in unexpected response";
       }
 
-      lastOutput = mos.GetOutputString();
+      lastOutput = mos.str();
    }
 
 };

@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <inttypes.h>
+#include <sstream>
 
 #include <jude/core/cpp/Object.h>
 #include <jude/core/cpp/ObjectArray.h>
@@ -325,7 +326,7 @@ namespace jude
       return RestfulResult(result);
    }
 
-   RestfulResult Object::UpdateFromJson(InputStreamInterface& JSON, bool deltasOnly)
+   RestfulResult Object::UpdateFromJson(std::istream& JSON, bool deltasOnly)
    {
       if (deltasOnly)
       {
@@ -375,23 +376,25 @@ namespace jude
 
    std::string Object::ToJSON_WithExtraField(ExtraFieldHandler extraField, jude_user_t userLevel, jude_size_t maxSize) const
    {
-      StringOutputStream output(maxSize);
+      std::stringstream ss;
+      OutputStreamWrapper output(ss);
+
       AccessControl accessControl(userLevel);
-      auto outputStream = output.GetLowLevelOutputStream();
-      outputStream->read_access_control = ReadAccessControlCallback;
-      outputStream->read_access_control_ctx = (void*)&accessControl;
+      auto outputStream = output.m_ostream;
+      outputStream.read_access_control = ReadAccessControlCallback;
+      outputStream.read_access_control_ctx = (void*)&accessControl;
       
       // Extra field handling
-      outputStream->extra_output_callback_ctx = &extraField;
-      outputStream->extra_output_callback = [] (void *userData, const char **name, const char **data) -> bool {
+      outputStream.extra_output_callback_ctx = &extraField;
+      outputStream.extra_output_callback = [] (void *userData, const char **name, const char **data) -> bool {
          auto handler = static_cast<ExtraFieldHandler*>(userData);
          return (*handler)(name, data);
       };
 
-      auto result = CreateResponse(jude_restapi_get(accessControl.GetAccessLevel(), m_object, "", outputStream), outputStream);
+      auto result = CreateResponse(jude_restapi_get(accessControl.GetAccessLevel(), m_object, "", &outputStream), &outputStream);
       if (result)
       {
-         return output.GetString();
+         return ss.str();
       }
       // return error string
       return "#ERROR: " + result.GetDetails();
@@ -529,12 +532,13 @@ namespace jude
       return paths;
    }
 
-   RestfulResult Object::RestGet(const char* fullpath, OutputStreamInterface& output, const AccessControl& accessControl) const
+   RestfulResult Object::RestGet(const char* fullpath, std::ostream& output, const AccessControl& accessControl) const
    {
-      auto outputStream = output.GetLowLevelOutputStream();
-      outputStream->read_access_control = ReadAccessControlCallback;
-      outputStream->read_access_control_ctx = (void*)&accessControl;
-      return CreateResponse(jude_restapi_get(accessControl.GetAccessLevel(), m_object, fullpath, outputStream), outputStream);
+      OutputStreamWrapper wrapper(output);
+      auto outputStream = wrapper.m_ostream;
+      outputStream.read_access_control = ReadAccessControlCallback;
+      outputStream.read_access_control_ctx = (void*)&accessControl;
+      return CreateResponse(jude_restapi_get(accessControl.GetAccessLevel(), m_object, fullpath, &outputStream), &outputStream);
    }
 
    static void WriteAccessControlCallback(void* ctx, const jude_object_t* resource, jude_filter_t* filter)
@@ -546,35 +550,39 @@ namespace jude
       }
    }
 
-   RestfulResult Object::RestPost(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult Object::RestPost(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
       jude_id_t newlyCreatedId;
-      auto inputStream = input.GetLowLevelInputStream();
-      inputStream->write_access_control = WriteAccessControlCallback;
-      inputStream->write_access_control_ctx = (void*)&accessControl;
+      InputStreamWrapper wrapper(input);
+      auto inputStream = wrapper.m_istream;
+      inputStream.write_access_control = WriteAccessControlCallback;
+      inputStream.write_access_control_ctx = (void*)&accessControl;
 
-      auto statusCode = jude_restapi_post(accessControl.GetAccessLevel(), m_object, fullpath, inputStream, &newlyCreatedId);
+      auto statusCode = jude_restapi_post(accessControl.GetAccessLevel(), m_object, fullpath, &inputStream, &newlyCreatedId);
       if (jude_restapi_is_successful(statusCode))
       {
          return RestfulResult(newlyCreatedId);
       }
-      return CreateResponse(statusCode, inputStream);
+      return CreateResponse(statusCode, &inputStream);
    }
 
-   RestfulResult Object::RestPatch(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult Object::RestPatch(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
-      auto inputStream = input.GetLowLevelInputStream();
-      inputStream->write_access_control = WriteAccessControlCallback;
-      inputStream->write_access_control_ctx = (void*)&accessControl;
-      return CreateResponse(jude_restapi_patch(accessControl.GetAccessLevel(), m_object, fullpath, inputStream), inputStream);
+      InputStreamWrapper wrapper(input);
+      auto inputStream = wrapper.m_istream;
+      inputStream.write_access_control = WriteAccessControlCallback;
+      inputStream.write_access_control_ctx = (void*)&accessControl;
+      return CreateResponse(jude_restapi_patch(accessControl.GetAccessLevel(), m_object, fullpath, &inputStream), &inputStream);
    }
 
-   RestfulResult Object::RestPut(const char* fullpath, InputStreamInterface& input, const AccessControl& accessControl)
+   RestfulResult Object::RestPut(const char* fullpath, std::istream& input, const AccessControl& accessControl)
    {
-      auto inputStream = input.GetLowLevelInputStream();
-      inputStream->write_access_control = WriteAccessControlCallback;
-      inputStream->write_access_control_ctx = (void*)&accessControl;
-      return CreateResponse(jude_restapi_put(accessControl.GetAccessLevel(), m_object, fullpath, inputStream), inputStream);
+      InputStreamWrapper wrapper(input);
+      auto inputStream = wrapper.m_istream;
+      inputStream.write_access_control = WriteAccessControlCallback;
+      inputStream.write_access_control_ctx = (void*)&accessControl;
+
+      return CreateResponse(jude_restapi_put(accessControl.GetAccessLevel(), m_object, fullpath, &inputStream), &inputStream);
    }
 
    RestfulResult Object::RestDelete(const char* fullpath, const AccessControl& accessControl)

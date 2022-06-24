@@ -194,17 +194,15 @@ TEST_F(ClassOptionalAccessorsTests, test_optional_submsg_fields)
    ASSERT_STREQ(R"({"submsg_type":{"substuff1":"Hello"}})", optionalTypes.ToJSON().c_str());
 
    submsg.Clear();
-   ASSERT_STREQ(R"({"submsg_type":{}})", optionalTypes.ToJSON().c_str());
-   ASSERT_STREQ(R"({"submsg_type":{"substuff1":null}})", optionalTypes.ToJSON_WithNulls().c_str());
+   ASSERT_STREQ(R"({"submsg_type":{"substuff1":null}})", optionalTypes.ToJSON().c_str());
    submsg.ClearChangeMarkers();
-   ASSERT_STREQ(R"({"submsg_type":{}})", optionalTypes.ToJSON_WithNulls().c_str());
+   ASSERT_STREQ(R"({"submsg_type":{}})", optionalTypes.ToJSON().c_str());
 
    optionalTypes.Clear_submsg_type();
    ASSERT_FALSE(optionalTypes.Has_submsg_type());
-   ASSERT_STREQ("{}", optionalTypes.ToJSON().c_str());
-   ASSERT_STREQ(R"({"submsg_type":null})", optionalTypes.ToJSON_WithNulls().c_str());
+   ASSERT_STREQ(R"({"submsg_type":null})", optionalTypes.ToJSON().c_str());
    optionalTypes.ClearChangeMarkers();
-   ASSERT_STREQ("{}", optionalTypes.ToJSON_WithNulls().c_str());
+   ASSERT_STREQ("{}", optionalTypes.ToJSON().c_str());
 }
 
 TEST_F(ClassOptionalAccessorsTests, test_optional_enum_fields)
@@ -254,10 +252,9 @@ TEST_F(ClassOptionalAccessorsTests, test_optional_bit_fields)
    bitmask.ClearAll();
    ASSERT_FALSE(optionalTypes.Get_bitmask_type().IsSet());
    CheckAllFieldsUnset(optionalTypes, __LINE__);   
-   ASSERT_STREQ(R"({})", optionalTypes.ToJSON().c_str());
-   ASSERT_STREQ(R"({"bitmask_type":null})", optionalTypes.ToJSON_WithNulls().c_str());
+   ASSERT_STREQ(R"({"bitmask_type":null})", optionalTypes.ToJSON().c_str());
    optionalTypes.ClearChangeMarkers();
-   ASSERT_STREQ(R"({})", optionalTypes.ToJSON_WithNulls().c_str());
+   ASSERT_STREQ(R"({})", optionalTypes.ToJSON().c_str());
 }
 
 TEST_F(ClassOptionalAccessorsTests, test_unknown_field_parsing)

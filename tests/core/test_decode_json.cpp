@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "jude/jude.h"
-#include "streams/mock_istream.h"
+#include "jude/core/cpp/Stream.h"
 #include "test_base.h"
 
 using namespace std;
@@ -11,19 +11,19 @@ class JSON_DecodeTests : public JudeTestBase
 public:
    void CheckJsonParseOK(string json)
    {
-      MockInputStream mockInput;
-      mockInput.SetData(json);
-      bool result = jude_decode_noinit(mockInput.GetLowLevelInputStream(), optionals_object);
-      ASSERT_TRUE(result) << "FAIL: " << mockInput.GetInputErrorMsg() << " in JSON: " << json;
+      std::stringstream ss(json);
+      jude::InputStreamWrapper mockInput(ss);
+      bool result = jude_decode_noinit(&mockInput.m_istream, optionals_object);
+      ASSERT_TRUE(result) << "FAIL: " << jude_istream_get_error(&mockInput.m_istream) << " in JSON: " << json;
    }
 
    void CheckJsonParseFail(string json, string expectedError)
    {
-      MockInputStream mockInput;
-      mockInput.SetData(json);
-      bool result = jude_decode_noinit(mockInput.GetLowLevelInputStream(), optionals_object);
+      std::stringstream ss(json);
+      jude::InputStreamWrapper mockInput(ss);
+      bool result = jude_decode_noinit(&mockInput.m_istream, optionals_object);
       ASSERT_FALSE(result) << "Unexpectedly succeeded to parse JSON: " << json;
-      ASSERT_EQ(string(mockInput.GetInputErrorMsg()), expectedError);
+      ASSERT_EQ(string(jude_istream_get_error(&mockInput.m_istream)), expectedError);
    }
 
    bool IsSet(jude_object_t* object, string name)
