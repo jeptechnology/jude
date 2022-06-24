@@ -12,7 +12,7 @@ public:
    void CheckNonBufferedOutput(const char *dataToWrite, size_t length, const char *expected)
    {
       std::stringstream ss;
-      jude::OutputStreamWrapper mockOutput(ss);
+      jude::OutputStreamWrapper mockOutput(ss, 0);
       jude_ostream_t *ostream = &mockOutput.m_ostream;
 
       auto result = jude_ostream_write(ostream, reinterpret_cast<const uint8_t*>(dataToWrite), length);
@@ -26,7 +26,7 @@ public:
    void CheckBufferedOutput(const char *dataToWrite, size_t length, size_t bufferSize, const char *expectedOutput, const char *expectedBuffer)
    {
       std::stringstream ss;
-      jude::OutputStreamWrapper mockOutput(ss);
+      jude::OutputStreamWrapper mockOutput(ss, bufferSize);
       jude_ostream_t *ostream = &mockOutput.m_ostream;
 
       auto result = jude_ostream_write(ostream, reinterpret_cast<const uint8_t*>(dataToWrite), length);

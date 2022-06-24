@@ -39,6 +39,7 @@ TEST_F(JsonSchemaTests, Can_Create_SubMessage_schema)
 {
    auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::SubMessage::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
+   mockOutput.Flush();
    ASSERT_TRUE(ss.str().length() > 0);
 
    auto expectedJsonSchema = StripSpaces(R"(
@@ -81,6 +82,7 @@ TEST_F(JsonSchemaTests, Can_Create_AllOptional_schema)
 {
    auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::AllOptionalTypes::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
+   mockOutput.Flush();
    ASSERT_TRUE(ss.str().length() > 0);
 
    auto expectedJsonSchema = StripSpaces(R"(
@@ -145,6 +147,7 @@ TEST_F(JsonSchemaTests, Can_Create_AllRepeated_schema)
 {
    auto result = jude_create_default_json_schema(&mockOutput.m_ostream, jude::AllRepeatedTypes::RTTI(), jude_user_Public);
    ASSERT_TRUE(result);
+   mockOutput.Flush();
    ASSERT_TRUE(ss.str().length() > 0);
 
    auto expectedJsonSchema = StripSpaces(R"(

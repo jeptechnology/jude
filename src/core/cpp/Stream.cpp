@@ -45,30 +45,32 @@ namespace
 
 namespace jude 
 {
-   InputStreamWrapper::InputStreamWrapper(std::istream& input, const jude_decode_transport_t* transport)
+   InputStreamWrapper::InputStreamWrapper(std::istream& input, size_t bufferSize, const jude_decode_transport_t* transport)
       : m_underlyingInput(input)
    {
+      m_buffer.reserve(bufferSize);
+      
       jude_istream_create(
          &m_istream,
          transport,
          ReadCallback,
          &m_underlyingInput,
-         m_buffer,
-         std::size(m_buffer));
+         m_buffer.data(),
+         m_buffer.capacity());
    }
 
-   OutputStreamWrapper::OutputStreamWrapper(std::ostream& output, const jude_encode_transport_t* transport)
+   OutputStreamWrapper::OutputStreamWrapper(std::ostream& output, size_t bufferSize, const jude_encode_transport_t* transport)
       : m_underlyingOutput(output)
    {
+      m_buffer.reserve(bufferSize);
+
       jude_ostream_create(
          &m_ostream,
          transport,
          WriteCallback,
          &m_underlyingOutput,
-         m_buffer,
-         std::size(m_buffer));
-
-      m_ostream.output_recently_cleared_as_null = true;
+         m_buffer.data(),
+         m_buffer.capacity());
    }
 
    OutputStreamWrapper::~OutputStreamWrapper()

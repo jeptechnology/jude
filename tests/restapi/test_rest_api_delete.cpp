@@ -134,10 +134,16 @@ TEST_F(RestApiDeleteTests, delete_individual_field)
 
    Verify_Get(ADMIN, "/", OK, R"({"int16_type":123,"bool_type":true,"string_type":"Hello"})");
    Verify_Delete(ADMIN, "/bool_type", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"int16_type":123,"bool_type":null,"string_type":"Hello"})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"int16_type":123,"string_type":"Hello"})");
    Verify_Delete(ADMIN, "/string_type", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"int16_type":123,"string_type":null})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "", OK, R"({"int16_type":123})");
    Verify_Delete(ADMIN, "/int16_type", OK);
+   Verify_Get(ADMIN, "", OK, R"({"int16_type":null})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "", OK, R"({})");
 }
 
@@ -148,12 +154,20 @@ TEST_F(RestApiDeleteTests, delete_sub_object_individual_fields)
 
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff2":32,"substuff3":true}})");
    Verify_Delete(ADMIN, "/submsg_type/substuff2", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff2":null,"substuff3":true}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff3":true}})");
    Verify_Delete(ADMIN, "/submsg_type/substuff1", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":null,"substuff3":true}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff3":true}})");
    Verify_Delete(ADMIN, "/submsg_type/substuff3", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff3":null}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{}})");
    Verify_Delete(ADMIN, "/submsg_type/", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":null})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "", OK, R"({})");
 }
 
@@ -177,6 +191,8 @@ TEST_F(RestApiDeleteTests, delete_individual_element_of_array)
    Verify_Array_Delete(ADMIN, "/int8_type/0", OK);
    Verify_Array_Get(ADMIN, "/", OK, R"({"int8_type":[2,3,4],"bool_type":[true,true,false]})");
    Verify_Array_Delete(ADMIN, "/int8_type", OK);
+   Verify_Array_Get(ADMIN, "/", OK, R"({"int8_type":null,"bool_type":[true,true,false]})");
+   arrayTypes.ClearChangeMarkers();
    Verify_Array_Get(ADMIN, "/", OK, R"({"bool_type":[true,true,false]})");
    Verify_Array_Delete(ADMIN, "/int8_type/1", Not_Found);
    Verify_Array_Delete(ADMIN, "/bool_type/10", Not_Found);
@@ -247,6 +263,12 @@ TEST_F(RestApiDeleteTests, delete_individual_element_of_sub_object_array)
    )");
 
    Verify_Array_Delete(ADMIN, "/submsg_type/", OK);
+   Verify_Array_Get(ADMIN, "/", OK, R"(
+      {  
+         "submsg_type":null
+      }
+   )");
+   arrayTypes.ClearChangeMarkers();
    Verify_Array_Get(ADMIN, "/", OK, R"(
       {  
       }

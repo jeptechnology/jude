@@ -36,24 +36,24 @@
 
 namespace jude 
 {
-   static constexpr size_t BufferSize = 1024;
+   static constexpr size_t DefaultBufferSize = 4096;
 
    struct InputStreamWrapper
    {
-      char           m_buffer[BufferSize];
+      std::vector<char> m_buffer;
       std::istream&  m_underlyingInput; // where we really get our data from
       jude_istream_t m_istream; // the structure for the low level C code to use
 
-      InputStreamWrapper(std::istream& input, const jude_decode_transport_t* transport = jude_decode_transport_json);
+      InputStreamWrapper(std::istream& input, size_t bufferSize = DefaultBufferSize, const jude_decode_transport_t* transport = jude_decode_transport_json);
    };
 
    struct OutputStreamWrapper
    {
-      char           m_buffer[BufferSize];
+      std::vector<char> m_buffer;
       std::ostream&  m_underlyingOutput; // where we want our data to eventually go
       jude_ostream_t m_ostream;          // wrapper used by lowl level C code
       
-      OutputStreamWrapper(std::ostream& output, const jude_encode_transport_t* transport = jude_encode_transport_json);
+      OutputStreamWrapper(std::ostream& output, size_t bufferSize = DefaultBufferSize, const jude_encode_transport_t* transport = jude_encode_transport_json);
       ~OutputStreamWrapper();
 
       void Flush();

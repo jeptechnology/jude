@@ -637,7 +637,7 @@ namespace jude
 
          output << (Options::SerialiseCollectionAsObjectMap ? "}" : "]");
 
-         return output ? jude_rest_Internal_Server_Error : jude_rest_OK;
+         return jude_rest_OK;
       }
       else if (resource)
       {

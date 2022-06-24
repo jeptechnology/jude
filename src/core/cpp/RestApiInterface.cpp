@@ -53,22 +53,6 @@ namespace jude
       return "#ERROR: " + result.GetDetails();
    }
 
-   std::string RestApiInterface::ToJSON_WithNulls(const char* path, size_t maxSize, jude_user_t userLevel) const
-   {
-      std::stringstream ss;
-      
-      // Output "Changed" but not "Set" as null.
-      //ss.GetLowLevelOutputStream()->output_recently_cleared_as_null = true;
-
-      auto result = RestGet(path, ss, userLevel);
-      if (result)
-      {
-         return ss.str();
-      }
-      // return error string
-      return "#ERROR: " + result.GetDetails();
-   }
-
    RestfulResult RestApiInterface::RestPostString(const char* path, const char *input, jude_user_t userLevel)
    {
       std::stringstream is(input);

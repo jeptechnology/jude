@@ -20,7 +20,6 @@ public:
    {
       std::stringstream ss;
       jude::OutputStreamWrapper mockOutput(ss);
-      mockOutput.m_ostream.output_recently_cleared_as_null = true;
       bool result = jude_encode(&mockOutput.m_ostream, optionals_object);
       jude_ostream_flush(&mockOutput.m_ostream);
       ASSERT_TRUE(result) << "FAIL: " << jude_ostream_get_error(&mockOutput.m_ostream) << " in JSON: " << json;
@@ -31,7 +30,6 @@ public:
    {
       std::stringstream ss;
       jude::OutputStreamWrapper mockOutput(ss);
-      mockOutput.m_ostream.output_recently_cleared_as_null = true;
       bool result = jude_encode(&mockOutput.m_ostream, repeats_object);
       jude_ostream_flush(&mockOutput.m_ostream);
       ASSERT_TRUE(result) << "FAIL: " << jude_ostream_get_error(&mockOutput.m_ostream) << " in JSON: " << json;

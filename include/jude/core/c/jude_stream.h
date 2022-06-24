@@ -58,7 +58,6 @@ struct jude_ostream_t
    const char *member;      // current field being encoded
    bool  has_error;
    bool  suppress_first_tag;      // don't output first tag
-   bool  output_recently_cleared_as_null; // 
    /*
     * Read access control callback (optionally NULL) will be called whenever fields are accessed during encoding
     * A null filter allows read access to all fields.

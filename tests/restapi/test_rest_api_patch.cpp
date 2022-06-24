@@ -148,16 +148,22 @@ TEST_F(RestApiPatchTests, patch_null_field_will_scrub_the_field)
 
    // Patching "null" will remove the value
    Verify_Patch(ADMIN, "/submsg_type/substuff2", "null", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff2":null,"substuff3":true}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff3":true}})");
    ASSERT_FALSE(singleTypes.Get_submsg_type().Has_substuff2());
 
    // Patch one field to null, other field to new value...
    Verify_Patch(ADMIN, "/submsg_type/", R"({"substuff1":"World","substuff3":null})", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"World","substuff3":null}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"World"}})");
    ASSERT_FALSE(singleTypes.Get_submsg_type().Has_substuff3());
 
    // Patch field to null directly
    Verify_Patch(ADMIN, "/submsg_type/substuff1", "null", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":null}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{}})");
    ASSERT_FALSE(singleTypes.Get_submsg_type().Has_substuff1());
 }

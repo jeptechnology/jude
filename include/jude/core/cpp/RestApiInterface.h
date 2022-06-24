@@ -56,7 +56,6 @@ namespace jude
       std::string   ToJSON(jude_user_t userLevel, size_t maxSize = 0xFFFF) const { return ToJSON("/", maxSize, userLevel); }
       std::string   ToJSON(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
       std::string   ToJSON_EmptyOnError(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
-      std::string   ToJSON_WithNulls(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
       RestfulResult ToJSON(std::ostream& output, const AccessControl& accessControl = accessToEverything) const { return RestGet("", output, accessControl); }
 
       RestfulResult RestPostString(const char* path, const char* input, jude_user_t userLevel = Options::DefaultAccessLevelForJSON);

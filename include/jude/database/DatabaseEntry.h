@@ -82,7 +82,7 @@ namespace jude
       // Function outputs JSON-Schema
       virtual void OutputJsonSchema(std::ostream& output, jude_user_t userLevel) const
       {
-         OutputStreamWrapper wrapper(output, jude_encode_transport_json);
+         OutputStreamWrapper wrapper(output, 4096, jude_encode_transport_json);
          jude_create_default_json_schema(&wrapper.m_ostream, GetType(), userLevel);
       }
 

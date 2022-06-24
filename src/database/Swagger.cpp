@@ -598,7 +598,7 @@ components:
          if (field->description && field->description[0] != '\0')
          {
             context.stream << ",\n";
-            context.stream << context.prefix << "s  { description: " << field->description << " }";
+            context.stream << context.prefix << "  { description: " << field->description << " }";
          }
 
          context.stream << "\n";
@@ -636,7 +636,7 @@ components:
                propertiesHasBeenOutput = true;
             }
 
-            output << "        %s:\n", field->label;
+            output << "        " << field->label << ":\n";
             
             if (jude_field_is_object(field) && !jude_field_is_array(field))
             {

@@ -153,6 +153,8 @@ TEST_F(RestApiPutTests, put_null_field_will_scrub_the_field)
 
    // Puting "null" will remove the value
    Verify_Put(ADMIN, "/submsg_type/substuff2", "null", OK);
+   Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff2":null,"substuff3":true}})");
+   singleTypes.ClearChangeMarkers();
    Verify_Get(ADMIN, "/", OK, R"({"submsg_type":{"substuff1":"Hello","substuff3":true}})");
    ASSERT_FALSE(singleTypes.Get_submsg_type().Has_substuff2());
 
