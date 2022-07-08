@@ -25,6 +25,7 @@
 
 #include <string>
 #include <functional>
+#include <optional>
 #include <vector>
 #include <memory>
 
@@ -250,6 +251,7 @@ namespace jude
       // To fix, we should ensure all genuine attempts to get the fixed id field of objects use the method Id() instead. Remove this when we can.
       jude_id_t GetId() const { return Id();}
       bool IsIdSet() const { return IsIdAssigned(); }
+      
       template<typename T>
       std::optional<T> GetFieldAsNumber(const std::string& name, jude_size_t arrayIndex = 0) const
       {
@@ -259,6 +261,7 @@ namespace jude
          }
          return std::nullopt;
       }   
+
       bool IsFieldChanged(const std::string& name) const 
       { 
          if (auto field = jude_rtti_find_field(m_object->__rtti, name.c_str()))

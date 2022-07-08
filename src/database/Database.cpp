@@ -31,6 +31,7 @@
 #include <map>
 #include <vector>
 #include <optional>
+#include <sstream>
 #include <iomanip>
 
 using namespace std;
