@@ -68,21 +68,13 @@ namespace jude
       Database&    m_db;
       SubscriptionHandle m_unsubscriber;
 
-      std::string ReadFile(const fs::path& path) 
-      {
-         std::ifstream input_file(path);
-         if (!input_file.is_open()) 
-         {
-            return "";
-         }
-         return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-      }
-
       void Restore(const fs::path& filepath, const std::string datamodelPath)
       {
-         auto json = ReadFile(filepath);
-         jude::RomInputStream input(json.c_str(), json.length());
-         m_db.Restore(datamodelPath, input);
+         std::ifstream input_file(filepath);
+         if (input_file.is_open()) 
+         {
+            m_db.Restore(datamodelPath, input_file);
+         }
       }
 
       void BootstrapData(const std::string &rootFolder)

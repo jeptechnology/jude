@@ -33,7 +33,7 @@ extern "C" {
 typedef struct jude_rtti_t
 {
    const char* name;
-   const jude_field_t *field_list;
+   const jude_field_t * const field_list;
    jude_size_t         field_count;
    jude_size_t         data_size;
 } jude_rtti_t;

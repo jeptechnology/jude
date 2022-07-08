@@ -88,7 +88,7 @@ namespace jude
       void GenerateYAMLforSwaggerOAS3(std::ostream& output, RestApiSecurityLevel::Value userLevel) const;
       virtual std::string GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const override;
 
-      //
+      // Generic subscribe to all nodes in the tree
       virtual SubscriptionHandle SubscribeToAllPaths(std::string prefix, PathNotifyCallback callback, FieldMaskGenerator filterGenerator, NotifyQueue& queue) override;
 
       // From PubSubInterface...

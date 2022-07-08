@@ -31,10 +31,10 @@ namespace jude
    {
       using Value = jude_user_t;
 
-      constexpr Value Local  = jude_user_Public;
-      constexpr Value Cloud  = jude_user_Cloud;
-      constexpr Value Admin  = jude_user_Admin;
-      constexpr Value Root   = jude_user_Root;
+      static constexpr Value Local  = jude_user_Public;
+      static constexpr Value Cloud  = jude_user_Cloud;
+      static constexpr Value Admin  = jude_user_Admin;
+      static constexpr Value Root   = jude_user_Root;
    };
 
    class AccessControl

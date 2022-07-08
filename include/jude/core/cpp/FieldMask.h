@@ -99,9 +99,17 @@ namespace jude
       static FieldMask ForFields(const jude_rtti_t& type, std::vector<std::string> fieldNames, bool deltasOnly = false);
       static FieldMask ForAllChanges();
 
-      // Backwards compatibility
+      //////////////////////////////////////////////////////////////////////////////
+      // Start of Protobuf compatibility layer - we want to remove this eventually
       void Allow(FieldIndex index) { SetChanged(index); }
+      std::vector<jude_index_t> GetAllChanged() const { return AsVector(); }
+      //////////////////////////////////////////////////////////////////////////////
    };
 
    using FieldMaskGenerator = FieldMask::FieldMaskGenerator;
+
+   //////////////////////////////////////////////////////////////////////////////
+   // Start of Protobuf compatibility layer - we want to remove this eventually
+   using FieldFilter = FieldMask;
+   //////////////////////////////////////////////////////////////////////////////
 }
