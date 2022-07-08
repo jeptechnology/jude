@@ -28,7 +28,7 @@ namespace jude
 {
    const AccessControl RestApiInterface::accessToEverything; // gives access to all fields
 
-   std::string RestApiInterface::ToJSON_EmptyOnError(const char* path, size_t maxSize, jude_user_t userLevel) const
+   std::string RestApiInterface::ToJSON_EmptyOnError(const char* path, size_t maxSize, RestApiSecurityLevel::Value userLevel) const
    {
       std::stringstream ss;
       auto result = RestGet(path, ss, userLevel);
@@ -41,7 +41,7 @@ namespace jude
    }
 
    // Convenience function
-   std::string RestApiInterface::ToJSON(const char *path, size_t maxSize, jude_user_t userLevel) const
+   std::string RestApiInterface::ToJSON(const char *path, size_t maxSize, RestApiSecurityLevel::Value userLevel) const
    { 
       std::stringstream ss;
       auto result = RestGet(path, ss, userLevel);
@@ -53,19 +53,19 @@ namespace jude
       return "#ERROR: " + result.GetDetails();
    }
 
-   RestfulResult RestApiInterface::RestPostString(const char* path, const char *input, jude_user_t userLevel)
+   RestfulResult RestApiInterface::RestPostString(const char* path, const char *input, RestApiSecurityLevel::Value userLevel)
    {
       std::stringstream is(input);
       return RestPost(path, is, userLevel);
    }
 
-   RestfulResult RestApiInterface::RestPatchString(const char* path, const char* input, jude_user_t userLevel)
+   RestfulResult RestApiInterface::RestPatchString(const char* path, const char* input, RestApiSecurityLevel::Value userLevel)
    {
       std::stringstream is(input);
       return RestPatch(path, is, userLevel);
    }
 
-   RestfulResult RestApiInterface::RestPutString(const char* path, const char* input, jude_user_t userLevel)
+   RestfulResult RestApiInterface::RestPutString(const char* path, const char* input, RestApiSecurityLevel::Value userLevel)
    {
       std::stringstream is(input);
       return RestPut(path, is, userLevel);

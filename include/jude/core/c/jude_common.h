@@ -230,8 +230,9 @@ typedef enum
 {
    jude_user_Open    = 0,  // anyone (even unauthenticated users) over the API
    jude_user_Public  = 1,  // authenticated users over the API
-   jude_user_Admin   = 2,  // trusted user over the API (e.g. internal processes, CLI)
-   jude_user_Root    = 3   // internal code only
+   jude_user_Cloud   = 2,  // cloud based interactions (slightly higher access that Public)
+   jude_user_Admin   = 3,  // trusted user over the API (e.g. internal processes, CLI)
+   jude_user_Root    = 4   // internal code only
 } jude_user_t;
 
 // Forward declarations...

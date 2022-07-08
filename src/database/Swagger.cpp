@@ -338,17 +338,17 @@ components:
            description: Not found
 )";
 
-      static bool IsReadable(const jude_field_t& field, jude_user_t userLevel)
+      static bool IsReadable(const jude_field_t& field, RestApiSecurityLevel::Value userLevel)
       {
          return field.permissions.read <= userLevel;
       }
 
-      static bool IsWritable(const jude_field_t& field, jude_user_t userLevel)
+      static bool IsWritable(const jude_field_t& field, RestApiSecurityLevel::Value userLevel)
       {
          return field.permissions.write <= userLevel;
       }
 
-      static bool IsReadableOrWritable(const jude_field_t& field, jude_user_t userLevel)
+      static bool IsReadableOrWritable(const jude_field_t& field, RestApiSecurityLevel::Value userLevel)
       {
          return IsReadable(field, userLevel) || IsWritable(field, userLevel);
       }
@@ -359,7 +359,7 @@ components:
 
          std::ostream& stream;
          std::string prefix;
-         jude_user_t userLevel;
+         RestApiSecurityLevel::Value userLevel;
       };
 
       int64_t GetMinimum(const jude_field_t& field)
@@ -415,7 +415,7 @@ components:
 
       void OutputSchema(SchemaContext& context, const jude_field_t* field);
 
-      std::string GetSchemaForActionField(const jude_field_t& field, jude_user_t userLevel)
+      std::string GetSchemaForActionField(const jude_field_t& field, RestApiSecurityLevel::Value userLevel)
       {
          std::stringstream output;
          SchemaContext context(output);
@@ -578,7 +578,7 @@ components:
          }
       }
 
-      void GenerateObjectFieldSchema(SchemaContext& context, const jude_field_t* field, jude_user_t userLevel)
+      void GenerateObjectFieldSchema(SchemaContext& context, const jude_field_t* field, RestApiSecurityLevel::Value userLevel)
       {
          context.stream << context.prefix << "allOf: [\n";
          context.stream << context.prefix << "  { $ref: '#/components/schemas/" << field->details.sub_rtti->name << "_Schema' }";
@@ -605,7 +605,7 @@ components:
          context.stream << context.prefix << "]\n";
       }
 
-      void GenerateSchema(std::ostream& output, const jude_rtti_t& rtti, jude_user_t userLevel)
+      void GenerateSchema(std::ostream& output, const jude_rtti_t& rtti, RestApiSecurityLevel::Value userLevel)
       {
          SchemaContext context(output);
          context.prefix = "          ";
@@ -670,7 +670,7 @@ components:
          }
       }
 
-      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel)
+      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, RestApiSecurityLevel::Value userLevel)
       {
          for (const auto& s : schemas)
          {

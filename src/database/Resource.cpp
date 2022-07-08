@@ -32,7 +32,7 @@ using namespace std;
 
 namespace jude
 {
-   GenericResource::GenericResource(const string& name, const jude_rtti_t& type, jude_user_t accessLevel, std::shared_ptr<jude::Mutex> mutex)
+   GenericResource::GenericResource(const string& name, const jude_rtti_t& type, RestApiSecurityLevel::Value accessLevel, std::shared_ptr<jude::Mutex> mutex)
       : DatabaseEntry(mutex)
       , m_name(name)
       , m_object(type, 
@@ -62,7 +62,7 @@ namespace jude
       }
    }
 
-   jude_user_t GenericResource::GetAccessLevel(CRUD crud) const
+   RestApiSecurityLevel::Value GenericResource::GetAccessLevel(CRUD crud) const
    {
       switch (crud)
       {
@@ -75,7 +75,7 @@ namespace jude
       return jude_user_Root;
    }
 
-   void GenericResource::SetAccessLevel(CRUD crud, jude_user_t level)
+   void GenericResource::SetAccessLevel(CRUD crud, RestApiSecurityLevel::Value level)
    {
       switch (crud)
       {
@@ -149,12 +149,12 @@ namespace jude
       }
    }
 
-   void GenericResource::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
+   void GenericResource::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const
    {
       swagger::RecursivelyOutputSchemas(output, alreadyDone, &m_object.Type(), userLevel);
    }
 
-   void GenericResource::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const
+   void GenericResource::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const
    {
       const auto& rtti = m_object.Type();
 
@@ -195,7 +195,7 @@ namespace jude
       }
    }
 
-   std::string GenericResource::GetSwaggerReadSchema(jude_user_t userLevel) const
+   std::string GenericResource::GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const
    {
       if (userLevel < m_access.canRead)
       {
@@ -308,7 +308,7 @@ namespace jude
          });
    }
 
-   std::vector<std::string> GenericResource::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel) const
+   std::vector<std::string> GenericResource::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel) const
    {
       return m_object.SearchForPath(operationType, pathPrefix, maxPaths, userLevel);
    }

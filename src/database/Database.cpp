@@ -63,7 +63,7 @@ namespace jude
 {
    bool NotifyImmediatelyOnChange = false;
 
-   Database::Database(std::string name, jude_user_t accessLevel, std::shared_ptr<jude::Mutex> mutex)
+   Database::Database(std::string name, RestApiSecurityLevel::Value accessLevel, std::shared_ptr<jude::Mutex> mutex)
       : DatabaseEntry(mutex)
       , m_name(name)
       , m_accessLevel(accessLevel)
@@ -97,7 +97,7 @@ namespace jude
       return true;
    }
 
-   const DatabaseEntry* Database::FindEntryForPath(const char** fullpath, jude_user_t accessLevel, bool recurse) const
+   const DatabaseEntry* Database::FindEntryForPath(const char** fullpath, RestApiSecurityLevel::Value accessLevel, bool recurse) const
    {
       auto token = RestApiInterface::GetNextUrlToken(*fullpath, fullpath);
       if (token == "")
@@ -128,12 +128,12 @@ namespace jude
       return reinterpret_cast<const Database*>(it->second)->FindEntryForPath(fullpath, accessLevel, recurse);
    }
 
-   DatabaseEntry* Database::FindEntryForPath(const char** fullpath, jude_user_t accessLevel, bool recurse)
+   DatabaseEntry* Database::FindEntryForPath(const char** fullpath, RestApiSecurityLevel::Value accessLevel, bool recurse)
    {
       return const_cast<DatabaseEntry*>(const_cast<const Database*>(this)->FindEntryForPath(fullpath, accessLevel, recurse));
    }
 
-   std::vector<std::string> Database::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel) const
+   std::vector<std::string> Database::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel) const
    {
       pathPrefix = pathPrefix ? pathPrefix : "";
 
@@ -214,7 +214,7 @@ namespace jude
    }
 
 
-   jude_user_t Database::GetAccessLevel(CRUD type) const
+   RestApiSecurityLevel::Value Database::GetAccessLevel(CRUD type) const
    {
       return m_accessLevel;
    }
@@ -319,7 +319,7 @@ namespace jude
       return nullptr;
    }
 
-   void Database::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
+   void Database::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const
    {
       for (const auto& entry : m_entries)
       {
@@ -341,7 +341,7 @@ namespace jude
       }
    }
 
-   void Database::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const
+   void Database::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const
    {
       // output swagger end points descriptions for the entire resource...
       std::string subPrefix = m_name.length() ? (prefix + "/" + m_name) : prefix;
@@ -386,7 +386,7 @@ namespace jude
       }
    }
 
-   void Database::GenerateYAMLforSwaggerOAS3(std::ostream& output, jude_user_t userLevel) const
+   void Database::GenerateYAMLforSwaggerOAS3(std::ostream& output, RestApiSecurityLevel::Value userLevel) const
    {
       char buffer[1024];
 
@@ -408,7 +408,7 @@ namespace jude
       OutputAllSchemasInYaml(output, alreadyDone, userLevel);
    }
 
-   std::string Database::GetSwaggerReadSchema(jude_user_t userLevel) const
+   std::string Database::GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const
    {
       if (userLevel < m_accessLevel)
       {

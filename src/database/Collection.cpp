@@ -32,7 +32,7 @@ using namespace std;
 
 namespace jude
 {
-   CollectionBase::CollectionBase(const jude_rtti_t& RTTI, const std::string& name, jude_user_t accessLevel, size_t capacity, std::shared_ptr<jude::Mutex> mutex)
+   CollectionBase::CollectionBase(const jude_rtti_t& RTTI, const std::string& name, RestApiSecurityLevel::Value accessLevel, size_t capacity, std::shared_ptr<jude::Mutex> mutex)
       : DatabaseEntry(mutex)
       , m_rtti(RTTI)
       , m_name(name)
@@ -44,7 +44,7 @@ namespace jude
       m_access.canDelete = accessLevel;
    }
 
-   jude_user_t CollectionBase::GetAccessLevel(CRUD crud) const
+   RestApiSecurityLevel::Value CollectionBase::GetAccessLevel(CRUD crud) const
    {
       switch (crud)
       {
@@ -56,7 +56,7 @@ namespace jude
       return jude_user_Root;
    }
 
-   void CollectionBase::SetAccessLevel(CRUD crud, jude_user_t level)
+   void CollectionBase::SetAccessLevel(CRUD crud, RestApiSecurityLevel::Value level)
    {
       switch (crud)
       {
@@ -67,12 +67,12 @@ namespace jude
       }
    }
 
-   void CollectionBase::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const
+   void CollectionBase::OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const
    {
       swagger::RecursivelyOutputSchemas(output, alreadyDone, &m_rtti, userLevel);
    }
 
-   void CollectionBase::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const
+   void CollectionBase::OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const
    {
       char buffer[1024];
       auto collectionName = m_name.c_str();
@@ -132,7 +132,7 @@ namespace jude
       }
    }
 
-   std::string CollectionBase::GetSwaggerReadSchema(jude_user_t userLevel) const
+   std::string CollectionBase::GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const
    {
       if (userLevel < m_access.canRead)
       {
@@ -382,7 +382,7 @@ namespace jude
       return LockForTransaction(id);
    }
 
-   std::vector<std::string> CollectionBase::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel) const
+   std::vector<std::string> CollectionBase::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel) const
    {
       pathPrefix = pathPrefix ? pathPrefix : "";
 

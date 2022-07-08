@@ -251,7 +251,7 @@ namespace jude
          Stop();
       }
 
-      void StartPublishing(DatabaseEntry& db, std::string topicPrefix, jude_user_t user = jude_user_Public)
+      void StartPublishing(DatabaseEntry& db, std::string topicPrefix, RestApiSecurityLevel::Value user = jude_user_Public)
       {
          m_unsubscribers.push_back(db.SubscribeToAllPaths(
             "", 

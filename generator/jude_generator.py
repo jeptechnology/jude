@@ -288,7 +288,7 @@ public:
 
    %DATABASE%(
       const std::string& name = "", 
-      jude_user_t access = jude_user_Public, 
+      RestApiSecurityLevel access = jude_user_Public, 
       std::shared_ptr<jude::Mutex> sharedMutex = std::make_shared<jude::Mutex>())
       : jude::Database(name, access, sharedMutex)
       %MEMBER_INITIALISERS%

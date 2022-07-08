@@ -374,7 +374,7 @@ namespace jude
       }
    }
 
-   std::string Object::ToJSON_WithExtraField(ExtraFieldHandler extraField, jude_user_t userLevel, jude_size_t maxSize) const
+   std::string Object::ToJSON_WithExtraField(ExtraFieldHandler extraField, RestApiSecurityLevel::Value userLevel, jude_size_t maxSize) const
    {
       std::stringstream ss;
       OutputStreamWrapper output(ss);
@@ -400,7 +400,7 @@ namespace jude
       return "#ERROR: " + result.GetDetails();
    }
 
-   std::vector<std::string> Object::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel) const
+   std::vector<std::string> Object::SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel) const
    {
       std::vector<std::string> paths;
 

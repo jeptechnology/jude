@@ -63,7 +63,7 @@ namespace jude
       };
 
       virtual std::string GetName() const = 0;
-      virtual jude_user_t GetAccessLevel(CRUD type) const = 0;
+      virtual RestApiSecurityLevel::Value GetAccessLevel(CRUD type) const = 0;
       virtual const jude_rtti_t* GetType() const = 0;
       virtual size_t SubscriberCount() const = 0;
       virtual void ClearAllDataAndSubscribers() = 0;
@@ -75,12 +75,12 @@ namespace jude
       virtual bool Restore(std::string path, std::istream& input) = 0;
 
       // Functions to support Open Api Spec 3.0 generation
-      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const = 0;
-      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const = 0;
-      virtual std::string GetSwaggerReadSchema(jude_user_t userLevel) const = 0;
+      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const = 0;
+      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const = 0;
+      virtual std::string GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const = 0;
 
       // Function outputs JSON-Schema
-      virtual void OutputJsonSchema(std::ostream& output, jude_user_t userLevel) const
+      virtual void OutputJsonSchema(std::ostream& output, RestApiSecurityLevel::Value userLevel) const
       {
          OutputStreamWrapper wrapper(output, 4096, jude_encode_transport_json);
          jude_create_default_json_schema(&wrapper.m_ostream, GetType(), userLevel);

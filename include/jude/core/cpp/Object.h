@@ -217,13 +217,13 @@ namespace jude
       virtual RestfulResult RestPut   (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
-      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;
+      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel = jude_user_Root) const override;
 
-      virtual std::string ToString(jude_size_t fieldIndex, jude_size_t maxSize = 0xFFFF, jude_user_t userLevel = jude_user_Root) const
+      virtual std::string ToString(jude_size_t fieldIndex, jude_size_t maxSize = 0xFFFF, RestApiSecurityLevel::Value userLevel = jude_user_Root) const
       {
          return ToJSON_EmptyOnError(FieldName(fieldIndex), maxSize, userLevel);
       }
-      std::string ToJSON_WithExtraField(ExtraFieldHandler extraField, jude_user_t userLevel, jude_size_t maxSize = 0xFFFF) const;
+      std::string ToJSON_WithExtraField(ExtraFieldHandler extraField, RestApiSecurityLevel::Value userLevel, jude_size_t maxSize = 0xFFFF) const;
 
       std::string operator[](std::string path) const
       {
