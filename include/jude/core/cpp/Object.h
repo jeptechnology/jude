@@ -152,7 +152,7 @@ namespace jude
 
       // The "id" is a useful "index" into collections and arrays:
       // - the id is unique to an instance of the micro document engine (but not globally across multiple instances of the document engine)
-      // - a missing id will indicate that this object is an "empty slot" and can be used by "Add", "Insert" or "Post" to the object array
+      // - a missing id will indicate that this object is "null"
       jude_id_t Id() const { return m_object->m_id; }
       bool      IsIdAssigned() const;
       Object&   AssignId(jude_id_t newId);
@@ -249,7 +249,8 @@ namespace jude
       // NOTE: This is unhelpful when you speficy a "custom" id field with different capitalisation in the schema, e.g. "Id" or "ID"
       // This would then render this function invisible when accessing through the derived type-safe Object.
       // To fix, we should ensure all genuine attempts to get the fixed id field of objects use the method Id() instead. Remove this when we can.
-      jude_id_t GetId() const { return Id();}
+      jude_id_t GetId() const { return Id(); }
+      void SetId(jude_id_t id) { AssignId(id); }
       bool IsIdSet() const { return IsIdAssigned(); }
       
       template<typename T>

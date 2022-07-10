@@ -102,6 +102,30 @@ namespace jude
          return {};
       }
 
+      std::optional<T_Object> Find_If(std::function<bool(const T_Object&)> pred)
+      {
+         for (const auto& object : *this)
+         {
+            if (pred(object))
+            {
+               return const_cast<Object*>(&object)->CloneAs<T_Object>();
+            }
+         }
+         return {};
+      }
+
+      std::optional<const T_Object> Find_If(std::function<bool(const T_Object&)> pred) const
+      {
+         for (const auto& object : *this)
+         {
+            if (pred(object))
+            {
+               return const_cast<Object*>(&object)->CloneAs<T_Object>();
+            }
+         }
+         return {};
+      }
+
       T_Object operator[](jude_size_t id)
       {
          return _At(id).As<T_Object>();
@@ -172,8 +196,10 @@ namespace jude
             while (++m_index < m_last 
                  && !m_array->_At(m_index)); // skip to next non-deleted
          }
+         operator bool() const { return m_array->_At(m_index).IsOK(); }
 
          value_type operator* () const { return GetObject(); }
+         value_type* operator-> () const { return GetObject(); }
       };
    };
 }
