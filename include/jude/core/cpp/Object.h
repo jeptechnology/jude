@@ -262,6 +262,14 @@ namespace jude
          }
          return std::nullopt;
       }   
+      template<typename T>
+      void GenericSet(jude_size_t fieldIndex, T newValue, jude_index_t arrayIndex = 0)
+      {
+         static_assert(std::is_arithmetic<T>::value, "T must be numeric");
+      
+         // NOTE: This is a safe operation (no memory corruption) but it will produce undefined values in the target field if the field width is wrong
+         jude_object_set_value_in_array(m_object, fieldIndex, arrayIndex, &newValue);
+      }
 
       bool IsFieldChanged(const std::string& name) const 
       { 
