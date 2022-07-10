@@ -296,7 +296,8 @@ namespace jude
 
       if (path_token[0] != '*')
       {
-         char* endptr = nullptr;
+         char* endptr;
+         errno = 0;
          auto id = strtoull(path_token, &endptr, 10);
          if (errno == 0 && path_token && !*endptr)
          {
