@@ -433,7 +433,17 @@ namespace jude
       auto candidateObject = newObject.Clone(false);
       if (generate_uuid || !candidateObject.IsIdAssigned())
       {
-         candidateObject.AssignId(jude_generate_uuid());
+         ////////////////////////////////////////////////////////
+         // Protobuf compatibility layer
+         if (Options::GenerateIDsBAsedOnCollectionSize && !ContainsId(count() + 1))
+         {
+            candidateObject.AssignId(count() + 1);
+         }
+         else
+         ////////////////////////////////////////////////////////
+         {
+            candidateObject.AssignId(jude_generate_uuid());
+         }
       }
 
       auto uuid = candidateObject.Id();

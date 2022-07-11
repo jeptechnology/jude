@@ -132,7 +132,17 @@ namespace jude
 
          if (id == JUDE_AUTO_ID)
          {
-            id = jude_generate_uuid();
+            ////////////////////////////////////////////////////////
+            // Protobuf compatibility layer
+            if (Options::GenerateIDsBAsedOnCollectionSize && !ContainsId(count() + 1))
+            {
+               id = count() + 1;
+            }
+            else
+            ////////////////////////////////////////////////////////
+            {
+               id = jude_generate_uuid();
+            }
          }
          
          // Lock now - pass this into the transaction to keep locked until the transaction completes.

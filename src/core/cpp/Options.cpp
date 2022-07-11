@@ -39,6 +39,8 @@ namespace jude
       // Done over the REST API (default) or even just if we create "in code"?
       bool ValidatePostOnlyForRestAPI = true; 
 
+      bool GenerateIDsBAsedOnCollectionSize = false;
+
       // By default all code that does not explicitly specify an access level gets root access to the data
       // For a more security concious usage of this library, suggest using jude_user_Public here?
       RestApiSecurityLevel::Value DefaultAccessLevelForJSON = RestApiSecurityLevel::Root;

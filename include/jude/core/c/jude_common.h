@@ -273,6 +273,11 @@ namespace jude
       // When creating a new entry in a collection, should we validate only when this has been
       // Done over the REST API (default) or even just if we create "in code"?
       extern jude_user_t DefaultAccessLevelForJSON; 
+
+      // If set to true, we do not generate random ID's for everything. Instead, we generate the next available ID based
+      // on the collection / array we are about to populate with a new object. 
+      // NOTE: This leads to duplicate ID's in the system but is required to keep our tests backwards compatible.
+      extern bool GenerateIDsBAsedOnCollectionSize;
    }
 }
 #endif
