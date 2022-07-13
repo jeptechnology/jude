@@ -35,12 +35,14 @@
 
 namespace jude
 {
-
    using UnknownFieldHandler = std::function<bool(const char *unknownField, const char *fieldData)>;
    using ExtraFieldHandler = std::function<bool(const char **extraField, const char **fieldData)>;
 
-   // Shared Object behave like Java references
-   // - You can assign 
+   // Objects behave like Java references
+   // - You can create them
+   // - You can edit them
+   // - You have to explicitly Clone() them to make a copy
+   // - If you assign one to another then the original data is lost and lhs then points to rhs 
 
    class Object : public RestApiInterface
    {
@@ -53,7 +55,7 @@ namespace jude
       {
          std::unique_ptr<jude_object_t> object;
          std::function<void()> onChange;    // called when object or subpath changes
-         std::function<void()> onSingleRef; // called when reference count of this shared data is about to be one
+         std::function<void()> onSingleRef; // called when reference count of this shared data is about to be exactly one
       };
 
       std::shared_ptr<SharedRootData> m_sharedRoot;
