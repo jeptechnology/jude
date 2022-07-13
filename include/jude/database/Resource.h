@@ -42,8 +42,8 @@ namespace jude
    protected:
       std::string    m_name;
       struct {
-         jude_user_t canRead;
-         jude_user_t canUpdate;
+         RestApiSecurityLevel::Value canRead;
+         RestApiSecurityLevel::Value canUpdate;
       } m_access;
       
       Object         m_object;
@@ -58,7 +58,7 @@ namespace jude
       std::map<uint32_t, IndividualSubscriber> m_subscribers;
       std::map<uint32_t, Validatable<>::Validator> m_validators;
 
-      explicit GenericResource(const std::string& name, const jude_rtti_t& type, jude_user_t accessLevel, std::shared_ptr<jude::Mutex> mutex);
+      explicit GenericResource(const std::string& name, const jude_rtti_t& type, RestApiSecurityLevel::Value accessLevel, std::shared_ptr<jude::Mutex> mutex);
 
       RestfulResult PatchObject(Object& newObject);
       RestfulResult PutObject(Object& newObject);
@@ -82,8 +82,8 @@ namespace jude
    public:
       std::string GetName() const { return m_name; }
       const jude_rtti_t* GetType() const override { return &m_object.Type(); }
-      jude_user_t GetAccessLevel(CRUD crud) const override;
-      void        SetAccessLevel(CRUD crud, jude_user_t);
+      RestApiSecurityLevel::Value GetAccessLevel(CRUD crud) const override;
+      void        SetAccessLevel(CRUD crud, RestApiSecurityLevel::Value);
       virtual void ClearAllDataAndSubscribers() override;
       virtual size_t SubscriberCount() const override { return m_subscribers.size(); }
 
@@ -94,12 +94,12 @@ namespace jude
       virtual RestfulResult RestPut(const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
-      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;
+      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel = jude_user_Root) const override;
 
       virtual std::string DebugInfo() const override;
-      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const override;
-      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const override;
-      virtual std::string GetSwaggerReadSchema(jude_user_t userLevel) const override;
+      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const override;
+      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const override;
+      virtual std::string GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const override;
 
       virtual DBEntryType GetEntryType() const override { return DBEntryType::RESOURCE; }
 
@@ -125,7 +125,7 @@ namespace jude
       Resource(const Resource&) = delete;
 
    public:
-      explicit Resource(const char* name, jude_user_t accessLevel = jude_user_Public, std::shared_ptr<jude::Mutex> mutex = std::make_shared<jude::Mutex>())
+      explicit Resource(const char* name, RestApiSecurityLevel::Value accessLevel = jude_user_Public, std::shared_ptr<jude::Mutex> mutex = std::make_shared<jude::Mutex>())
          : GenericResource(name, *T_Object::RTTI(), accessLevel, mutex)
       {}
 

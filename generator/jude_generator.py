@@ -288,7 +288,7 @@ public:
 
    %DATABASE%(
       const std::string& name = "", 
-      jude_user_t access = jude_user_Public, 
+      RestApiSecurityLevel::Value access = jude_user_Public, 
       std::shared_ptr<jude::Mutex> sharedMutex = std::make_shared<jude::Mutex>())
       : jude::Database(name, access, sharedMutex)
       %MEMBER_INITIALISERS%
@@ -1049,7 +1049,7 @@ class DatabaseEntry:
          self.auth_update = str(auth)
          self.auth_delete = str(auth)
       
-      validAuth = ['Root', 'Admin', 'Public']
+      validAuth = ['Root', 'Admin', 'Cloud', 'Public']
       if (self.auth_read not in validAuth):
          raise SyntaxError("Field '" + self.name + "' has invalid read auth '" + self.auth_read + "': needs to be one of " + str(validAuth) )
       if (self.auth_create not in validAuth):

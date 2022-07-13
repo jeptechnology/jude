@@ -50,10 +50,10 @@ namespace jude
       const jude_rtti_t            &m_rtti; // type of resources stored in this CollectionBase
       std::string                   m_name;
       struct {
-         jude_user_t canCreate;
-         jude_user_t canRead;
-         jude_user_t canUpdate;
-         jude_user_t canDelete;
+         RestApiSecurityLevel::Value canCreate;
+         RestApiSecurityLevel::Value canRead;
+         RestApiSecurityLevel::Value canUpdate;
+         RestApiSecurityLevel::Value canDelete;
       } m_access;
       
       std::map<jude_id_t, Object> m_objects;
@@ -81,7 +81,7 @@ namespace jude
    protected:
       CollectionBase(const CollectionBase&) = delete;
 
-      explicit CollectionBase(const jude_rtti_t &RTTI, const std::string& name, jude_user_t accessLevel, size_t capacity, std::shared_ptr<jude::Mutex> mutex);
+      explicit CollectionBase(const jude_rtti_t &RTTI, const std::string& name, RestApiSecurityLevel::Value accessLevel, size_t capacity, std::shared_ptr<jude::Mutex> mutex);
       virtual ~CollectionBase() {}
 
       RestfulResult Post(const Object& newObject, bool generate_uuid, bool andValidate); // create new (new uuid is generated unless specified)
@@ -132,7 +132,17 @@ namespace jude
 
          if (id == JUDE_AUTO_ID)
          {
-            id = jude_generate_uuid();
+            ////////////////////////////////////////////////////////
+            // Protobuf compatibility layer
+            if (Options::GenerateIDsBAsedOnCollectionSize && !ContainsId(count() + 1))
+            {
+               id = count() + 1;
+            }
+            else
+            ////////////////////////////////////////////////////////
+            {
+               id = jude_generate_uuid();
+            }
          }
          
          // Lock now - pass this into the transaction to keep locked until the transaction completes.
@@ -163,8 +173,8 @@ namespace jude
    public:
       std::string GetName() const { return m_name; }
       const jude_rtti_t* GetType() const override { return &m_rtti; }
-      jude_user_t GetAccessLevel(CRUD crud) const override;
-      void        SetAccessLevel(CRUD crud, jude_user_t);
+      RestApiSecurityLevel::Value GetAccessLevel(CRUD crud) const override;
+      void        SetAccessLevel(CRUD crud, RestApiSecurityLevel::Value);
 
       using value_type     = jude::Object;
       using iterator       = CollectionBaseIterator;
@@ -205,12 +215,12 @@ namespace jude
       virtual RestfulResult RestPut(const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
-      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;
+      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel = jude_user_Root) const override;
 
       virtual std::string DebugInfo() const override;
-      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const override;
-      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const override;
-      virtual std::string GetSwaggerReadSchema(jude_user_t userLevel) const;
+      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const override;
+      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const override;
+      virtual std::string GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const;
 
       virtual DBEntryType GetEntryType() const override { return DBEntryType::COLLECTION; }
 
@@ -251,7 +261,7 @@ namespace jude
       Collection(const Collection&) = delete;
 
    public:
-      Collection(const char* name, size_t capacity = DefaultCapacity, jude_user_t accessLevel = jude_user_Public, std::shared_ptr<jude::Mutex> mutex = std::make_shared<jude::Mutex>())
+      Collection(const char* name, size_t capacity = DefaultCapacity, RestApiSecurityLevel::Value accessLevel = jude_user_Public, std::shared_ptr<jude::Mutex> mutex = std::make_shared<jude::Mutex>())
          : CollectionBase(*T_Object::RTTI(), name, accessLevel, capacity, mutex)
       {}
 

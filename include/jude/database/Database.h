@@ -35,7 +35,7 @@ namespace jude
    class Database : public DatabaseEntry
    {
       std::string m_name;
-      jude_user_t m_accessLevel;
+      RestApiSecurityLevel::Value m_accessLevel;
       bool m_allowGlobalRestGet;
       std::map<std::string, DatabaseEntry*> m_entries;
       
@@ -54,7 +54,7 @@ namespace jude
 
    public:
 
-      explicit Database(std::string name, jude_user_t accessLevel, std::shared_ptr<jude::Mutex> mutex);
+      explicit Database(std::string name, RestApiSecurityLevel::Value accessLevel, std::shared_ptr<jude::Mutex> mutex);
 
       void SetAllowGlobalRestGet(bool allowed) { m_allowGlobalRestGet = allowed; }
 
@@ -70,25 +70,25 @@ namespace jude
       virtual RestfulResult RestPut(const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
-      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;
+      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel = jude_user_Root) const override;
 
-      DatabaseEntry* FindEntryForPath(const char** fullpath, jude_user_t accessLevel, bool recurse = false);
-      const DatabaseEntry* FindEntryForPath(const char** fullpath, jude_user_t accessLevel, bool recurse = false) const;
+      DatabaseEntry* FindEntryForPath(const char** fullpath, RestApiSecurityLevel::Value accessLevel, bool recurse = false);
+      const DatabaseEntry* FindEntryForPath(const char** fullpath, RestApiSecurityLevel::Value accessLevel, bool recurse = false) const;
       virtual DBEntryType GetEntryType() const override { return DBEntryType::DATABASE; }
       
       // From DatabaseEntry - a Database is itself also a Database entry - it can be a sub-Database
       virtual std::string GetName() const override;
-      virtual jude_user_t GetAccessLevel(CRUD type) const override;
+      virtual RestApiSecurityLevel::Value GetAccessLevel(CRUD type) const override;
       virtual std::string DebugInfo() const override;
 
       virtual bool Restore(std::string path, std::istream& input) override;
 
-      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, jude_user_t userLevel) const override;
-      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, jude_user_t userLevel) const override;
-      void GenerateYAMLforSwaggerOAS3(std::ostream& output, jude_user_t userLevel) const;
-      virtual std::string GetSwaggerReadSchema(jude_user_t userLevel) const override;
+      virtual void OutputAllSchemasInYaml(std::ostream& output, std::set<const jude_rtti_t*>& alreadyDone, RestApiSecurityLevel::Value userLevel) const override;
+      virtual void OutputAllSwaggerPaths(std::ostream& output, const std::string& prefix, RestApiSecurityLevel::Value userLevel) const override;
+      void GenerateYAMLforSwaggerOAS3(std::ostream& output, RestApiSecurityLevel::Value userLevel) const;
+      virtual std::string GetSwaggerReadSchema(RestApiSecurityLevel::Value userLevel) const override;
 
-      //
+      // Generic subscribe to all nodes in the tree
       virtual SubscriptionHandle SubscribeToAllPaths(std::string prefix, PathNotifyCallback callback, FieldMaskGenerator filterGenerator, NotifyQueue& queue) override;
 
       // From PubSubInterface...

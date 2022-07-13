@@ -53,18 +53,18 @@ namespace jude
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) = 0;
 
       // Convenience functions
-      std::string   ToJSON(jude_user_t userLevel, size_t maxSize = 0xFFFF) const { return ToJSON("/", maxSize, userLevel); }
-      std::string   ToJSON(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
-      std::string   ToJSON_EmptyOnError(const char* path = "/", size_t maxSize = 0xFFFF, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const;
+      std::string   ToJSON(RestApiSecurityLevel::Value userLevel, size_t maxSize = 0xFFFF) const { return ToJSON("/", maxSize, userLevel); }
+      std::string   ToJSON(const char* path = "/", size_t maxSize = 0xFFFF, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON) const;
+      std::string   ToJSON_EmptyOnError(const char* path = "/", size_t maxSize = 0xFFFF, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON) const;
       RestfulResult ToJSON(std::ostream& output, const AccessControl& accessControl = accessToEverything) const { return RestGet("", output, accessControl); }
 
-      RestfulResult RestPostString(const char* path, const char* input, jude_user_t userLevel = Options::DefaultAccessLevelForJSON);
-      RestfulResult RestPatchString(const char* path, const char* input, jude_user_t userLevel = Options::DefaultAccessLevelForJSON);
-      RestfulResult RestPutString(const char* path, const char* input, jude_user_t userLevel = Options::DefaultAccessLevelForJSON);
+      RestfulResult RestPostString(const char* path, const char* input, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON);
+      RestfulResult RestPatchString(const char* path, const char* input, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON);
+      RestfulResult RestPutString(const char* path, const char* input, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON);
 
-      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const = 0;
+      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON) const = 0;
 
-      bool PathExists(CRUD operationType, const std::string& pathPrefix, jude_user_t userLevel = Options::DefaultAccessLevelForJSON) const
+      bool PathExists(CRUD operationType, const std::string& pathPrefix, RestApiSecurityLevel::Value userLevel = Options::DefaultAccessLevelForJSON) const
       {
          return SearchForPath(operationType, pathPrefix.c_str(), 1, userLevel).size() > 0;
       }

@@ -29,6 +29,6 @@ namespace jude
 {
    namespace jsonschema
    {
-      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, jude_user_t userLevel);
+      void RecursivelyOutputSchemas(std::ostream& output, std::set<const jude_rtti_t*>& schemas, const jude_rtti_t* rtti, RestApiSecurityLevel::Value userLevel);
    }
 }

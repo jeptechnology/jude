@@ -31,7 +31,7 @@
 typedef struct
 {
    jude_ostream_t *stream;
-   jude_user_t access_level;
+   RestApiSecurityLevel::Value access_level;
    jude_filter_t read_access_filter;
    jude_filter_t write_access_filter;
    int count;
@@ -407,7 +407,7 @@ static bool jude_json_schema_visitor(const jude_rtti_t* type, void *user_data)
 bool jude_create_default_json_schema(
       jude_ostream_t *stream,
       const jude_rtti_t *type,
-      jude_user_t accessLevel)
+      RestApiSecurityLevel::Value accessLevel)
 {
    if (type == NULL)
    {

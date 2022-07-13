@@ -27,10 +27,20 @@
 
 namespace jude
 {
+   namespace RestApiSecurityLevel
+   {
+      using Value = jude_user_t;
+
+      static constexpr Value Local  = jude_user_Public;
+      static constexpr Value Cloud  = jude_user_Cloud;
+      static constexpr Value Admin  = jude_user_Admin;
+      static constexpr Value Root   = jude_user_Root;
+   };
+
    class AccessControl
    {
       // Apply the access level to all levels of the document hierarchy
-      jude_user_t   m_accessLevel;   // what's my access level? Applies to all levels of hierachy
+      RestApiSecurityLevel::Value   m_accessLevel;   // what's my access level? Applies to all levels of hierachy
       bool          m_onlyPersisted; // only read/write what is persisted
 
       // Apply these only to the root object...
@@ -42,19 +52,19 @@ namespace jude
       void GetFilter(const jude_object_t* resource, bool forReading, jude_filter_t& filter) const;
 
    public:
-      AccessControl(jude_user_t accessLevel = jude_user_Root, 
+      AccessControl(RestApiSecurityLevel::Value accessLevel = jude_user_Root, 
                     const jude_filter_t* rootFieldFilter = nullptr, 
                     bool deltasOnly = false, 
                     bool persistentOnly = false);
 
       // convenience functions
-      static AccessControl Make(jude_user_t accessLevel, jude_filter_t* rootFieldFilter = nullptr);
-      static AccessControl Make_forDeltas(jude_user_t accessLevel, jude_filter_t* rootFieldFilter = nullptr);
-      static AccessControl Make_forPersistence(jude_user_t accessLevel, jude_filter_t* rootFieldFilter = nullptr);
-      static AccessControl Make_forPersistenceDeltas(jude_user_t accessLevel, jude_filter_t* rootFieldFilter = nullptr);
+      static AccessControl Make(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter = nullptr);
+      static AccessControl Make_forDeltas(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter = nullptr);
+      static AccessControl Make_forPersistence(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter = nullptr);
+      static AccessControl Make_forPersistenceDeltas(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter = nullptr);
       static AccessControl Make_forFields(std::initializer_list<jude_index_t> fields);
 
-      jude_user_t GetAccessLevel() const { return m_accessLevel; }
+      RestApiSecurityLevel::Value GetAccessLevel() const { return m_accessLevel; }
 
       virtual void GetReadFilter(const jude_object_t* resource, jude_filter_t& filter) const;
       virtual void GetWriteFilter(const jude_object_t* resource, jude_filter_t& filter) const;

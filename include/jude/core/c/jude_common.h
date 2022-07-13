@@ -230,8 +230,9 @@ typedef enum
 {
    jude_user_Open    = 0,  // anyone (even unauthenticated users) over the API
    jude_user_Public  = 1,  // authenticated users over the API
-   jude_user_Admin   = 2,  // trusted user over the API (e.g. internal processes, CLI)
-   jude_user_Root    = 3   // internal code only
+   jude_user_Cloud   = 2,  // cloud based interactions (slightly higher access that Public)
+   jude_user_Admin   = 3,  // trusted user over the API (e.g. internal processes, CLI)
+   jude_user_Root    = 4   // internal code only
 } jude_user_t;
 
 // Forward declarations...
@@ -272,6 +273,11 @@ namespace jude
       // When creating a new entry in a collection, should we validate only when this has been
       // Done over the REST API (default) or even just if we create "in code"?
       extern jude_user_t DefaultAccessLevelForJSON; 
+
+      // If set to true, we do not generate random ID's for everything. Instead, we generate the next available ID based
+      // on the collection / array we are about to populate with a new object. 
+      // NOTE: This leads to duplicate ID's in the system but is required to keep our tests backwards compatible.
+      extern bool GenerateIDsBAsedOnCollectionSize;
    }
 }
 #endif

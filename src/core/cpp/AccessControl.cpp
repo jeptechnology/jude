@@ -27,7 +27,7 @@
 namespace jude
 {
    AccessControl::AccessControl(
-      jude_user_t accessLevel,
+      RestApiSecurityLevel::Value accessLevel,
       const jude_filter_t* rootFieldFilter,
       bool deltasOnly,
       bool persistentOnly)
@@ -59,22 +59,22 @@ namespace jude
       }
    }
 
-   AccessControl AccessControl::Make(jude_user_t accessLevel, jude_filter_t* rootFieldFilter)
+   AccessControl AccessControl::Make(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter)
    {
       return AccessControl(accessLevel, rootFieldFilter, false, false);
    }
 
-   AccessControl AccessControl::Make_forDeltas(jude_user_t accessLevel, jude_filter_t* rootFieldFilter)
+   AccessControl AccessControl::Make_forDeltas(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter)
    {
       return AccessControl(accessLevel, rootFieldFilter, true, false);
    }
 
-   AccessControl AccessControl::Make_forPersistence(jude_user_t accessLevel, jude_filter_t* rootFieldFilter)
+   AccessControl AccessControl::Make_forPersistence(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter)
    {
       return AccessControl(accessLevel, rootFieldFilter, false, true);
    }
 
-   AccessControl AccessControl::Make_forPersistenceDeltas(jude_user_t accessLevel, jude_filter_t* rootFieldFilter)
+   AccessControl AccessControl::Make_forPersistenceDeltas(RestApiSecurityLevel::Value accessLevel, jude_filter_t* rootFieldFilter)
    {
       return AccessControl(accessLevel, rootFieldFilter, true, true);
    }

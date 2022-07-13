@@ -145,7 +145,7 @@ namespace jude
       return filter;
    }
 
-   FieldMask FieldMask::ForUser(const jude_rtti_t& type, jude_user_t user)
+   FieldMask FieldMask::ForUser(const jude_rtti_t& type, RestApiSecurityLevel::Value user)
    {
       FieldMask filter;
 

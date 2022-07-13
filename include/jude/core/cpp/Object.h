@@ -25,6 +25,7 @@
 
 #include <string>
 #include <functional>
+#include <optional>
 #include <vector>
 #include <memory>
 
@@ -153,7 +154,7 @@ namespace jude
 
       // The "id" is a useful "index" into collections and arrays:
       // - the id is unique to an instance of the micro document engine (but not globally across multiple instances of the document engine)
-      // - a missing id will indicate that this object is an "empty slot" and can be used by "Add", "Insert" or "Post" to the object array
+      // - a missing id will indicate that this object is "null"
       jude_id_t Id() const { return m_object->m_id; }
       bool      IsIdAssigned() const;
       Object&   AssignId(jude_id_t newId);
@@ -218,13 +219,13 @@ namespace jude
       virtual RestfulResult RestPut   (const char* path, std::istream& input, const AccessControl& accessControl = accessToEverything) override;
       virtual RestfulResult RestDelete(const char* path, const AccessControl& accessControl = accessToEverything) override;
 
-      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, jude_user_t userLevel = jude_user_Root) const override;
+      virtual std::vector<std::string> SearchForPath(CRUD operationType, const char* pathPrefix, jude_size_t maxPaths, RestApiSecurityLevel::Value userLevel = jude_user_Root) const override;
 
-      virtual std::string ToString(jude_size_t fieldIndex, jude_size_t maxSize = 0xFFFF, jude_user_t userLevel = jude_user_Root) const
+      virtual std::string ToString(jude_size_t fieldIndex, jude_size_t maxSize = 0xFFFF, RestApiSecurityLevel::Value userLevel = jude_user_Root) const
       {
          return ToJSON_EmptyOnError(FieldName(fieldIndex), maxSize, userLevel);
       }
-      std::string ToJSON_WithExtraField(ExtraFieldHandler extraField, jude_user_t userLevel, jude_size_t maxSize = 0xFFFF) const;
+      std::string ToJSON_WithExtraField(ExtraFieldHandler extraField, RestApiSecurityLevel::Value userLevel, jude_size_t maxSize = 0xFFFF) const;
 
       std::string operator[](std::string path) const
       {
@@ -250,8 +251,10 @@ namespace jude
       // NOTE: This is unhelpful when you speficy a "custom" id field with different capitalisation in the schema, e.g. "Id" or "ID"
       // This would then render this function invisible when accessing through the derived type-safe Object.
       // To fix, we should ensure all genuine attempts to get the fixed id field of objects use the method Id() instead. Remove this when we can.
-      jude_id_t GetId() const { return Id();}
+      jude_id_t GetId() const { return Id(); }
+      void SetId(jude_id_t id) { AssignId(id); }
       bool IsIdSet() const { return IsIdAssigned(); }
+      
       template<typename T>
       std::optional<T> GetFieldAsNumber(const std::string& name, jude_size_t arrayIndex = 0) const
       {
@@ -261,6 +264,15 @@ namespace jude
          }
          return std::nullopt;
       }   
+      template<typename T>
+      void GenericSet(jude_size_t fieldIndex, T newValue, jude_index_t arrayIndex = 0)
+      {
+         static_assert(std::is_arithmetic<T>::value, "T must be numeric");
+      
+         // NOTE: This is a safe operation (no memory corruption) but it will produce undefined values in the target field if the field width is wrong
+         jude_object_set_value_in_array(m_object, fieldIndex, arrayIndex, &newValue);
+      }
+
       bool IsFieldChanged(const std::string& name) const 
       { 
          if (auto field = jude_rtti_find_field(m_object->__rtti, name.c_str()))
@@ -270,7 +282,14 @@ namespace jude
          return false;
       }
 
+      bool UpdateFromMessage(const Object& rhs) { return Patch(rhs); }
+      
       ///////////////////////////////////////////////////////////////////////////////
    };
+
+   ///////////////////////////////////////////////////////////////////////////////
+   // Protobuf backwards compatibility
+   using MessageAccessor = Object;
+   ///////////////////////////////////////////////////////////////////////////////
 }
 

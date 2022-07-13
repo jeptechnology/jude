@@ -46,7 +46,7 @@ namespace jude
    class HttpServer
    {
       jude::Database &m_database;
-      jude_user_t     m_accessLevel;
+      RestApiSecurityLevel::Value     m_accessLevel;
 
       std::string DumpHeaders(const httplib::Headers &headers)
       {
@@ -125,7 +125,7 @@ namespace jude
       }
 
    public:
-      HttpServer(jude::Database &db, jude_user_t accessLevel)
+      HttpServer(jude::Database &db, RestApiSecurityLevel::Value accessLevel)
          : m_database(db)
          , m_accessLevel(accessLevel)
       {}
