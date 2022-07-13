@@ -97,18 +97,18 @@ namespace jude
       {
          if (auto object = _Find(id))
          {
-            return const_cast<Object*>(&object)->CloneAs<T_Object>();
+            return object.template CloneAs<T_Object>();
          }
          return {};
       }
 
       std::optional<T_Object> Find_If(std::function<bool(const T_Object&)> pred)
       {
-         for (const auto& object : *this)
+         for (auto& object : *this)
          {
             if (pred(object))
             {
-               return const_cast<Object*>(&object)->CloneAs<T_Object>();
+               return object;
             }
          }
          return {};
@@ -120,7 +120,7 @@ namespace jude
          {
             if (pred(object))
             {
-               return const_cast<Object*>(&object)->CloneAs<T_Object>();
+               return object.Clone();
             }
          }
          return {};
@@ -149,6 +149,7 @@ namespace jude
       {
          ObjectArray<T_Object>* m_array;
          mutable jude_size_t m_index{ 0 };
+         mutable T_Object m_current;
          jude_size_t m_last;
 
       protected:
@@ -179,6 +180,7 @@ namespace jude
                   m_index++;
                }
             }
+            m_current = GetObject();
          }
 
          Iterator &operator=(const Iterator& other)
@@ -195,11 +197,12 @@ namespace jude
          {
             while (++m_index < m_last 
                  && !m_array->_At(m_index)); // skip to next non-deleted
+            m_current = GetObject();
          }
          operator bool() const { return m_array->_At(m_index).IsOK(); }
 
-         value_type operator* () const { return GetObject(); }
-         value_type* operator-> () const { return GetObject(); }
+         reference operator* () const { return m_current; }
+         pointer   operator-> () const { return &m_current; }
       };
    };
 }
